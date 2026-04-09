@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import adobeLogo from "@/assets/front_adb.png";
 
 const Index = () => {
   const navigate = useNavigate();
