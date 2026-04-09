@@ -19,7 +19,7 @@ const Index = () => {
           <img src={adobeLogo} alt="Adobe" className="h-12 object-contain" />
         </div>
         <h1 className="text-4xl font-semibold text-[#1a1a1a]" style={{ fontFamily: "system-ui, sans-serif" }}>
-          ShareFile
+          ShareFile Pro
         </h1>
         <p className="text-lg text-[#888]">Secure file sharing, simplified</p>
       </div>
