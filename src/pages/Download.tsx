@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import adbTransfer from "@/assets/adb_transfer.png";
 
 const Download = () => {
   useEffect(() => {
