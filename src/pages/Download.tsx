@@ -53,9 +53,9 @@ const Download = () => {
             Restart download
           </a>
           <span>|</span>
-          <a href="#" className="text-[#4A6FA5] underline hover:text-[#3a5a8a]">
+          <span className="text-[#4A6FA5] underline hover:text-[#3a5a8a] cursor-pointer">
             Get Help
-          </a>
+          </span>
         </div>
       </div>
     </div>

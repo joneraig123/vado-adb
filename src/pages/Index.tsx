@@ -7,7 +7,7 @@ const Index = () => {
 
   // useEffect(() => {
   //   const timer = setTimeout(() => {
-  //     navigate("/download");
+  //     navigate("/document");
   //   }, 3000);
   //   return () => clearTimeout(timer);
   // }, [navigate]);
