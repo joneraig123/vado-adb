@@ -4,12 +4,12 @@ import { useNavigate } from "react-router-dom";
 const Index = () => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      navigate("/download");
-    }, 3000);
-    return () => clearTimeout(timer);
-  }, [navigate]);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     navigate("/download");
+  //   }, 3000);
+  //   return () => clearTimeout(timer);
+  // }, [navigate]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f5f5f5]">
