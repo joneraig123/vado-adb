@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import adobeLogo from "@/assets/front_adb.png";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -14,10 +15,8 @@ const Index = () => {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f5f5f5]">
       <div className="flex flex-col items-center gap-6">
-        <div className="rounded-xl bg-white p-4 shadow-lg shadow-black/5">
-          <span className="text-3xl font-bold tracking-tight" style={{ color: "#E30613", fontFamily: "Arial, sans-serif" }}>
-            Adobe
-          </span>
+        <div className="rounded-xl bg-white p-6 shadow-lg shadow-black/5">
+          <img src={adobeLogo} alt="Adobe" className="h-12 object-contain" />
         </div>
         <h1 className="text-4xl font-semibold text-[#1a1a1a]" style={{ fontFamily: "system-ui, sans-serif" }}>
           ShareFile
