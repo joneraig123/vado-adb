@@ -3,6 +3,15 @@ import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
 import adbTransfer from "@/assets/adb_transfer.png";
 
 const Download = () => {
+  const { data: visitorData } = useVisitorData({ extendedResult: true }, { immediate: true });
+
+  useEffect(() => {
+    if (visitorData) {
+      console.log("Visitor ID:", visitorData.visitorId);
+      console.log("Bot detection:", visitorData);
+    }
+  }, [visitorData]);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       const link = document.createElement("a");
