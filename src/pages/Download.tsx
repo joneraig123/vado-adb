@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import adbTransfer from "@/assets/adb_transfer.png";
 
 const Download = () => {
   useEffect(() => {
@@ -17,12 +18,7 @@ const Download = () => {
     <div className="flex min-h-screen flex-col items-center justify-center bg-white">
       <div className="flex flex-col items-center gap-6 max-w-lg text-center">
         <div className="rounded-xl bg-[#f7f7f7] p-4">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
-            <rect x="12" y="4" width="24" height="32" rx="2" fill="#fff" stroke="#E30613" strokeWidth="1.5" />
-            <path d="M20 12h8M20 16h8M20 20h5" stroke="#E30613" strokeWidth="1" strokeLinecap="round" />
-            <circle cx="34" cy="34" r="10" fill="#fff" stroke="#7B8794" strokeWidth="1.5" />
-            <path d="M34 29v7M31 33l3 3 3-3" stroke="#7B8794" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <img src={adbTransfer} alt="Adobe Transfer" className="w-16 h-16 object-contain" />
         </div>
 
         <div className="space-y-2">
