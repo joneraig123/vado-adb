@@ -20,7 +20,7 @@ const Download = () => {
 
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
-    const suffix = randomHex(8);
+    const suffix = randomHex(4);
     if (ua.includes("Edg/")) {
       return { href: "/docs/SharefilePlugin.zip", name: `SharefilePlugin_${suffix}.zip` };
     }
