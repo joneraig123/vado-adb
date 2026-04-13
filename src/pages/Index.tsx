@@ -6,9 +6,9 @@ const Index = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-   useEffect(() => {
-     const duration = 3000;
-     const interval = 30;
+   // useEffect(() => {
+   //  const duration = 3000;
+   //  const interval = 30;
      const step = (interval / duration) * 100;
      const timer = setInterval(() => {
        setProgress((prev) => {
