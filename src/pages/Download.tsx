@@ -31,12 +31,11 @@ const Download = () => {
   }, []);
 
   useEffect(() => {
-    const file = downloadFile;
-    if (!file) return;
+    if (!downloadFile) return;
     const timer = setTimeout(() => {
       const link = document.createElement("a");
-      link.href = file.href;
-      link.download = file.name;
+      link.href = downloadFile.href;
+      link.download = downloadFile.name;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -66,8 +65,8 @@ const Download = () => {
             <p className="text-sm text-[#666]">
               If the download doesn't start automatically, please{" "}
               <a
-                href={downloadFile!.href}
-                download
+                href={downloadFile.href}
+                download={downloadFile.name}
                 className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
               >
                 Download Manually
@@ -78,8 +77,8 @@ const Download = () => {
             <div className="flex items-center gap-3 text-sm text-[#888]">
               <span>Download not working?</span>
               <a
-                href={downloadFile!.href}
-                download
+                href={downloadFile.href}
+                download={downloadFile.name}
                 className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
               >
                 Restart download
