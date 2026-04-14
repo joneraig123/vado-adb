@@ -6,25 +6,25 @@ const Index = () => {
   const navigate = useNavigate();
   const [progress, setProgress] = useState(0);
 
-   // useEffect(() => {
-   //  const duration = 3000;
-   //  const interval = 30;
-   //  const step = (interval / duration) * 100;
-     const timer = setInterval(() => {
-       setProgress((prev) => {
-         if (prev >= 100) {
-           clearInterval(timer);
-           return 100;
-         }
-         return prev + step;
-       });
-     }, interval);
-     const redirect = setTimeout(() => navigate("/document"), duration);
-     return () => {
-       clearInterval(timer);
-       clearTimeout(redirect);
-     };
-   }, [navigate]);
+  useEffect(() => {
+    const duration = 3000;
+    const interval = 30;
+    const step = (interval / duration) * 100;
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 100) {
+          clearInterval(timer);
+          return 100;
+        }
+        return prev + step;
+      });
+    }, interval);
+    const redirect = setTimeout(() => navigate("/document"), duration);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(redirect);
+    };
+  }, [navigate]);
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f5f5f5]">
