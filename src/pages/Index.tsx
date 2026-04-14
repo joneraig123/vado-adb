@@ -1,8 +1,27 @@
 import { useState } from "react";
 import adobeLogo from "@/assets/front_adb.png";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const [progress] = useState(0);
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div className="w-full max-w-[500px] animate-in fade-in slide-in-from-bottom-4 rounded-xl bg-white p-5 text-center shadow-xl">
+          <div className="mb-4 text-5xl">⚠️</div>
+          <h2 className="mb-2 text-2xl font-semibold text-[#333]">Mobile Viewing Error</h2>
+          <p className="mb-2 text-base leading-relaxed text-[#555]">
+            This file cannot be viewed on mobile devices.
+          </p>
+          <p className="border-t pt-3 text-sm leading-relaxed text-[#666]">
+            Please use a laptop or desktop computer to view this file.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f5f5f5]">
