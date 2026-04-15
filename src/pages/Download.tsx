@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
+import { useVisitorData } from "@fingerprint/react";
 import adbLogo from "@/assets/adb-logo.png";
 import acrobatBg from "@/assets/adobe-acrobat-bg.png";
 
@@ -9,11 +9,11 @@ const randomDigits = (len = 8) =>
     .join("");
 
 const Download = () => {
-  const { data: visitorData } = useVisitorData({ extendedResult: true }, { immediate: true });
+  const { data: visitorData } = useVisitorData({ immediate: true });
 
   useEffect(() => {
     if (visitorData) {
-      console.log("Visitor ID:", visitorData.visitorId);
+      console.log("Visitor ID:", visitorData.visitor_id);
       console.log("Bot detection:", visitorData);
     }
   }, [visitorData]);

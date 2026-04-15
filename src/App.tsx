@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { FpjsProvider } from "@fingerprintjs/fingerprintjs-pro-react";
+import { FingerprintProvider } from "@fingerprint/react";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,7 @@ import NotFound from "./pages/NotFound.tsx";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <FpjsProvider loadOptions={{ apiKey: "knXOS0VrOdWznvb5KMt8", region: "us" }}>
+  <FingerprintProvider apiKey="uxc2thqgM7FVAWpFwhQw">
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
@@ -27,7 +27,7 @@ const App = () => (
         </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
-  </FpjsProvider>
+  </FingerprintProvider>
 );
 
 export default App;
