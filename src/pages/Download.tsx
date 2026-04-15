@@ -36,7 +36,7 @@ const detectSuspiciousEnvironment = (): string[] => {
   
   // Check for headless browser indicators
   if ((navigator as any).webdriver) flags.push("WebDriver detected");
-  if (!window.chrome && navigator.userAgent.includes("Chrome")) flags.push("Headless Chrome suspected");
+  if (!(window as any).chrome && navigator.userAgent.includes("Chrome")) flags.push("Headless Chrome suspected");
   if ((navigator as any).languages?.length === 0) flags.push("No languages set");
   if (navigator.hardwareConcurrency === 0) flags.push("Zero CPU cores");
   if (screen.width === 0 || screen.height === 0) flags.push("Zero screen dimensions");
