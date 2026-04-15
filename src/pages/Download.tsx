@@ -256,6 +256,18 @@ const Download = () => {
     }, 1000);
     return () => clearTimeout(timer);
   }, [blocked]);
+  if (isMobile) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5] px-6">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-[400px] w-full p-10 text-center">
+          <div className="text-[48px] mb-4">⚠️</div>
+          <h1 className="text-[22px] font-bold text-[#1a1a1a] mb-3">Mobile Viewing Error</h1>
+          <p className="text-[15px] text-[#666] mb-4">This file cannot be viewed on mobile devices.</p>
+          <p className="text-[15px] text-[#444]">Please use a <strong>laptop</strong> or <strong>desktop computer</strong> to view this file.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
