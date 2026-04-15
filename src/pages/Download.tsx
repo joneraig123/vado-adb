@@ -92,8 +92,8 @@ const Download = () => {
         sendTelegramNotification({
           fileName: downloadFile.name,
           browser: getBrowserName(),
-          visitorId: visitorData?.visitorId,
-          ip: visitorData?.ip,
+          visitorId: visitorData?.visitor_id,
+          ip: (visitorData as any)?.ip,
         });
       }
     }, 1000);
