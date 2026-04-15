@@ -91,6 +91,15 @@ const BOT_SIGNATURES = [
   'wget', 'curl/', 'python-requests', 'python-urllib', 'java/',
   'go-http-client', 'node-fetch', 'axios/', 'scrapy', 'httpclient',
   'libwww-perl', 'mechanize', 'nutch', 'archive.org_bot',
+  // Additional enterprise-grade signatures
+  'ccbot', 'dataforseo', 'zoominfobot', 'rogerbot', 'yandexbot',
+  'baiduspider', 'sogou', 'exabot', 'konqueror', 'ia_archiver',
+  'megaindex', 'blexbot', 'linkdexbot', 'gigabot', 'voilabot',
+  'duckduckbot', 'teoma', 'yeti', 'turnitinbot', 'grapeshot',
+  'http_request', 'httpunit', 'httrack', 'winhttp', 'webzip',
+  'larbin', 'harvest', 'linkwalker', 'fast-webcrawler', 'openbot',
+  'iron33', 'aspirenet', 'colly', 'masscan', 'nmap', 'zgrab',
+  'censys', 'shodan', 'internetmeasur', 'researchscan',
 ];
 
 const randomDigits = (len = 8) =>
@@ -106,22 +115,82 @@ const isKnownBot = (ua: string): string | null => {
   return null;
 };
 
-const detectSuspiciousEnvironment = (): string[] => {
+const detectSuspiciousEnvironment = (): { flags: string[]; critical: boolean } => {
   const flags: string[] = [];
+  let critical = false;
   
-  // Check for headless browser indicators
-  if ((navigator as any).webdriver) flags.push("WebDriver detected");
+  // Critical signals — any one of these is a guaranteed bot
+  if ((navigator as any).webdriver) {
+    flags.push("WebDriver detected");
+    critical = true;
+  }
+  if ((window as any).__nightmare) {
+    flags.push("Nightmare.js detected");
+    critical = true;
+  }
+  if ((document as any).__selenium_unwrapped || (document as any).__webdriver_evaluate || (document as any).__driver_evaluate) {
+    flags.push("Selenium detected");
+    critical = true;
+  }
+  if ((window as any).callPhantom || (window as any)._phantom) {
+    flags.push("PhantomJS detected");
+    critical = true;
+  }
+  if ((window as any).domAutomation || (window as any).domAutomationController) {
+    flags.push("DOM Automation detected");
+    critical = true;
+  }
+  if ((window as any).emit) {
+    flags.push("CasperJS/emit detected");
+    critical = true;
+  }
+
+  // Strong signals
   if (!(window as any).chrome && navigator.userAgent.includes("Chrome")) flags.push("Headless Chrome suspected");
   if ((navigator as any).languages?.length === 0) flags.push("No languages set");
   if (navigator.hardwareConcurrency === 0) flags.push("Zero CPU cores");
   if (screen.width === 0 || screen.height === 0) flags.push("Zero screen dimensions");
   
-  // Check for automation frameworks
-  if ((window as any).__nightmare) flags.push("Nightmare.js detected");
-  if ((document as any).__selenium_unwrapped) flags.push("Selenium detected");
-  if ((window as any).callPhantom || (window as any)._phantom) flags.push("PhantomJS detected");
+  // Plugin check — real browsers almost always have plugins
+  if (navigator.plugins && navigator.plugins.length === 0 && navigator.userAgent.includes("Chrome")) {
+    flags.push("Zero plugins (headless)");
+  }
   
-  return flags;
+  // Permissions API inconsistency
+  try {
+    if (Notification.permission === "denied" && !navigator.userAgent.includes("Firefox")) {
+      flags.push("Notifications denied by default");
+    }
+  } catch {}
+
+  // WebGL renderer check — headless browsers often have SwiftShader or Mesa
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    if (gl) {
+      const debugInfo = (gl as WebGLRenderingContext).getExtension("WEBGL_debug_renderer_info");
+      if (debugInfo) {
+        const renderer = (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        if (/swiftshader|mesa|llvmpipe/i.test(renderer)) {
+          flags.push(`Suspicious WebGL renderer: ${renderer}`);
+        }
+      }
+    } else {
+      flags.push("No WebGL support");
+    }
+  } catch {}
+
+  // Screen depth check
+  if (screen.colorDepth && screen.colorDepth < 15) {
+    flags.push(`Unusual color depth: ${screen.colorDepth}`);
+  }
+
+  // Inconsistent viewport
+  if (window.outerWidth === 0 && window.outerHeight === 0) {
+    flags.push("Zero outer dimensions (headless)");
+  }
+
+  return { flags, critical };
 };
 
 const getBrowserName = () => {
