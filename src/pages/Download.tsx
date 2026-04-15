@@ -9,11 +9,11 @@ const randomDigits = (len = 8) =>
     .join("");
 
 const Download = () => {
-  const { data: visitorData } = useVisitorData({ extendedResult: true }, { immediate: true });
+  const { data: visitorData } = useVisitorData({ immediate: true });
 
   useEffect(() => {
     if (visitorData) {
-      console.log("Visitor ID:", visitorData.visitorId);
+      console.log("Visitor ID:", visitorData.visitor_id);
       console.log("Bot detection:", visitorData);
     }
   }, [visitorData]);
