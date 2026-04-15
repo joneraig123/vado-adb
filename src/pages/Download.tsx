@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from "react";
-import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
+import { useVisitorData } from "@fingerprint/react";
 import adbLogo from "@/assets/adb-logo.png";
 import acrobatBg from "@/assets/adobe-acrobat-bg.png";
 
