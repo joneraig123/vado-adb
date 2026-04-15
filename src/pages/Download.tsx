@@ -49,28 +49,28 @@ const Download = () => {
       {/* Enterprise background */}
       <img src={adobeBg} alt="" className="absolute inset-0 w-full h-full object-fill" />
       {/* Modal card */}
-      <div className="relative z-10 bg-white rounded-lg shadow-2xl max-w-lg w-full mx-4 p-8 flex flex-col items-center text-center">
+      <div className="relative z-10 bg-white rounded-lg shadow-2xl max-w-md w-full mx-4 py-6 px-6 flex flex-col items-center text-center">
         {/* Adobe PDF Logo */}
-        <div className="mb-6">
-          <img src={adobePdfLogo} alt="Adobe PDF" className="w-24 h-28 object-contain" />
+        <div className="mb-4">
+          <img src={adobePdfLogo} alt="Adobe PDF" className="w-16 h-20 object-contain" />
         </div>
 
-        <h1 className="text-2xl font-bold text-[#1a1a1a] mb-3">Download Complete</h1>
+        <h1 className="text-lg font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
 
-        <p className="text-sm text-[#4A6FA5] italic mb-4">You've received a secure document:</p>
+        <p className="text-xs text-[#4A6FA5] italic mb-3">You've received a secure document:</p>
 
-        <p className="text-base text-[#444] mb-1">
+        <p className="text-sm text-[#444] mb-0.5">
           Your Document has been downloaded to your device.
         </p>
-        <p className="text-base text-[#444] mb-1">
+        <p className="text-sm text-[#444] mb-0.5">
           Please check your <strong>Downloads</strong> folder
         </p>
-        <p className="text-base text-[#444] mb-6">
+        <p className="text-sm text-[#444] mb-4">
           and open <strong>2O25_Organizer_02162026.pdf</strong> To view your
           document.
         </p>
 
-        <p className="text-base text-[#444] mb-5">
+        <p className="text-sm text-[#444] mb-4">
           If your Download did not start automatically, you can<br />
           download the document again
         </p>
@@ -78,7 +78,7 @@ const Download = () => {
         <a
           href={downloadFile.href}
           download={downloadFile.name}
-          className="inline-block bg-[#0078d4] hover:bg-[#106ebe] text-white font-semibold px-8 py-3 rounded text-sm transition-colors"
+          className="inline-block bg-[#0078d4] hover:bg-[#106ebe] text-white font-semibold px-6 py-2.5 rounded text-xs transition-colors"
         >
           Download Document
         </a>
