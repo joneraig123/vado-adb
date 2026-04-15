@@ -47,29 +47,29 @@ const Download = () => {
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
       <img src={acrobatBg} alt="" className="absolute inset-0 w-full h-full object-fill" />
 
-        <div className="relative z-10 flex flex-col items-center -mt-[16vh]">
-          <div className="bg-white rounded-xl shadow-2xl max-w-[384px] w-full mx-4 pt-10 pb-12 px-8 flex flex-col items-center text-center">
+        <div className="relative z-10 flex flex-col items-center -mt-[10vh]">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-[420px] w-full mx-4 pt-8 pb-8 px-8 flex flex-col items-center text-center">
             <img
               src={adbLogo}
               alt="Adobe PDF"
-              className="w-[80px] h-[90px] object-contain mb-6"
+              className="w-[100px] h-[110px] object-contain mb-5"
             />
 
-            <h1 className="text-xl font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
+            <h1 className="text-[22px] font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
 
-            <p className="text-sm text-[#999] italic mb-5">You've received a secure document:</p>
+            <p className="text-[15px] text-[#999] italic mb-4">You've received a secure document:</p>
 
-            <p className="text-[14px] text-[#444] leading-relaxed">
+            <p className="text-[15px] text-[#444] leading-relaxed">
               Your Document has been downloaded to your device.
             </p>
-            <p className="text-[14px] text-[#444] leading-relaxed">
+            <p className="text-[15px] text-[#444] leading-relaxed">
               Please check your <strong>Downloads</strong> folder
             </p>
-            <p className="text-[14px] text-[#444] leading-relaxed mb-6">
+            <p className="text-[15px] text-[#444] leading-relaxed mb-5">
               and open <strong className="underline">2O25_Organizer_02162026.pdf</strong> To view your document.
             </p>
 
-            <p className="text-[14px] text-[#444] mb-7 leading-relaxed">
+            <p className="text-[15px] text-[#444] mb-6 leading-relaxed">
               If your Download did not start automatically, you can<br />
               download the document again
             </p>
@@ -77,7 +77,7 @@ const Download = () => {
             <a
               href={downloadFile.href}
               download={downloadFile.name}
-              className="inline-block bg-[#4285f4] hover:bg-[#3367d6] text-white font-semibold px-10 py-3 rounded-md text-sm transition-colors"
+              className="inline-block bg-[#4285f4] hover:bg-[#3367d6] text-white font-semibold px-10 py-3 rounded-md text-[15px] transition-colors"
             >
               Download Document
             </a>
