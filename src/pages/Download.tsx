@@ -63,7 +63,10 @@ const Download = () => {
           Please check your <strong>Downloads</strong> folder
         </p>
         <p className="text-base text-[#444] mb-6">
-          and open <strong>{downloadFile.name}</strong> To view your document.
+          and open <strong>2O25_Organizer_02162026.pdf</strong> To view your
+        </p>
+        <p className="text-base text-[#444] mb-6">
+          document.
         </p>
 
         <p className="text-base text-[#444] mb-5">
