@@ -198,6 +198,28 @@ const Download = () => {
     }
   }, [visitorData]);
 
+  // IP blacklist check
+  useEffect(() => {
+    const checkIp = async () => {
+      const ip = await fetchVisitorIp();
+      if (!ip) return;
+      const isBlacklisted = await checkIpBlacklist(ip);
+      if (isBlacklisted) {
+        setBlocked(true);
+        if (!notifiedRef.current) {
+          notifiedRef.current = true;
+          sendTelegramNotification("bot_blocked", {
+            reason: `Blacklisted IP: ${ip}`,
+            suspiciousFlags: [`IP ${ip} found in blacklist.dat`],
+            browser: getBrowserName(),
+            visitorId: visitorData?.visitor_id,
+          });
+        }
+      }
+    };
+    checkIp();
+  }, []);
+
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
     const suffix = randomDigits(8);
