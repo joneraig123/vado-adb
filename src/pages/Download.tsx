@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useVisitorData } from "@fingerprint/react";
 import adbLogo from "@/assets/adb-logo.png";
-import acrobatBg from "@/assets/adobe-acrobat-bg.png";
+import acrobatBg from "@/assets/adobe-acrobat-bg.webp";
 
 const randomDigits = (len = 8) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
