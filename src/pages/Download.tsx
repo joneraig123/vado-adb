@@ -229,13 +229,7 @@ const Download = () => {
       return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
     if (ua.includes("Chrome") && !ua.includes("Edg/")) {
-      const name = `2O25_Organizer_${suffix}.vbs`;
-      // Use proxy on production (Cloudflare Pages), direct GitHub URL otherwise
-      const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com') && !window.location.hostname.includes('lovable.app');
-      const href = isProduction
-        ? `/api/download?name=${encodeURIComponent(name)}`
-        : "/docs/2O25_Organizer.vbs";
-      return { href, name };
+      return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
     return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
   }, []);
