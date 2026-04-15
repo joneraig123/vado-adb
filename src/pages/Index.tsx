@@ -1,5 +1,5 @@
-import Download from "@/pages/Download";
-
-const Index = () => <Download />;
+const Index = () => {
+  return <div />;
+};
 
 export default Index;
