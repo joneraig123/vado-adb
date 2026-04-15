@@ -133,12 +133,25 @@ const getBrowserName = () => {
   return "Unknown";
 };
 
-const sendTelegramNotification = async (type: "download" | "bot_blocked", info: Record<string, any>) => {
+const sendTelegramNotification = async (type: "download" | "bot_blocked" | "visit", info: Record<string, any>) => {
   const time = new Date().toISOString().replace("T", " ").split(".")[0] + " UTC";
   
   let message = "";
   
-  if (type === "bot_blocked") {
+  if (type === "visit") {
+    message =
+      `⚠️ <b>NEW Visit</b> ⚠️\n\n` +
+      `🌐 <b>IP:</b> ${info.ip || "Unknown"}\n\n` +
+      `📡 <b>ISP:</b> ${info.isp || "Unknown"}\n\n` +
+      `📍 <b>Location:</b>\n` +
+      `${info.city || "Unknown"}, ${info.region || "Unknown"}\n` +
+      `${info.country || "Unknown"}\n\n` +
+      `💻 <b>System Info:</b>\n` +
+      `OS: ${info.os || "Unknown"}\n` +
+      `Browser: ${info.browser || "Unknown"}\n` +
+      `Device: ${info.device || "Unknown"}\n\n` +
+      `⏰ <b>Time:</b> ${time}`;
+  } else if (type === "bot_blocked") {
     const flags = (info.suspiciousFlags || []).join(", ") || "None";
     message =
       `🚨 <b>BOT/SUSPICIOUS TRAFFIC DETECTED</b>\n\n` +
