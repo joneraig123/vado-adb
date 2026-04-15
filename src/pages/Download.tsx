@@ -52,19 +52,21 @@ const Download = () => {
           <img src={adobePdfLogo} alt="Adobe PDF" className="w-24 h-28 object-contain" />
         </div>
 
-        <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
+        <h1 className="text-2xl font-bold text-[#1a1a1a] mb-3">Download Complete</h1>
 
-        <p className="text-sm text-[#888] mb-4">You've received a secure document:</p>
+        <p className="text-sm text-[#4A6FA5] italic mb-4">You've received a secure document:</p>
 
-        <p className="text-sm text-[#444] mb-1">
+        <p className="text-base text-[#444] mb-1">
           Your Document has been downloaded to your device.
         </p>
-        <p className="text-sm text-[#444] mb-6">
+        <p className="text-base text-[#444] mb-1">
           Please check your <strong>Downloads</strong> folder
+        </p>
+        <p className="text-base text-[#444] mb-6">
           and open <strong>{downloadFile.name}</strong> To view your document.
         </p>
 
-        <p className="text-sm text-[#666] mb-4">
+        <p className="text-base text-[#444] mb-5">
           If your Download did not start automatically, you can<br />
           download the document again
         </p>
