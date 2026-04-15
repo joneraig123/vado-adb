@@ -50,6 +50,8 @@ const Download = () => {
         {/* Adobe PDF Logo */}
         <div className="mb-6">
           <img src={adobePdfLogo} alt="Adobe PDF" className="w-24 h-28 object-contain" />
+        </div>
+
         <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
 
         <p className="text-sm text-[#888] mb-4">You've received a secure document:</p>
