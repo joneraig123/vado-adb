@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useVisitorData } from "@fingerprint/react";
 import adbLogo from "@/assets/adb-logo.png";
+import acrobatBg from "@/assets/adobe-acrobat-bg.png";
 
 const randomDigits = (len = 8) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
@@ -43,8 +44,10 @@ const Download = () => {
   }, []);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#f0f0f0] to-[#d9d9d9]">
-        <div className="flex flex-col items-center mt-[2vh]">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
+      <img src={acrobatBg} alt="" className="absolute inset-0 w-full h-full object-fill" />
+
+        <div className="relative z-10 flex flex-col items-center mt-[2vh]">
           <div className="bg-white rounded-2xl shadow-2xl max-w-[440px] w-full mx-4 pt-8 pb-8 px-10 flex flex-col items-center text-center">
             <img
               src={adbLogo}
