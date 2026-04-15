@@ -254,13 +254,8 @@ const Download = () => {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
     } catch {
-      // Fallback to direct link
-      const link = document.createElement("a");
-      link.href = file.href;
-      link.download = file.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      // Fallback: open in new tab so we don't navigate away from /document
+      window.open(file.href, "_blank");
     }
 
     if (!notifiedRef.current) {
