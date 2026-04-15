@@ -1,5 +1,6 @@
 import { useEffect, useMemo } from "react";
 import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
+import adobePdfLogo from "@/assets/adobe-pdf-logo.png";
 
 const randomHex = (len = 4) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
@@ -46,12 +47,9 @@ const Download = () => {
     <div className="flex min-h-screen flex-col items-center justify-center bg-[#f0f0f0]">
       {/* Modal card */}
       <div className="bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 p-8 flex flex-col items-center text-center">
-        {/* Adobe PDF Logo placeholder */}
+        {/* Adobe PDF Logo */}
         <div className="mb-6">
-          <div className="w-24 h-28 bg-[#f5f5f5] rounded flex items-center justify-center text-xs text-[#999]">
-            {/* TODO: Replace with Adobe PDF logo */}
-            <span className="text-4xl">📄</span>
-          </div>
+          <img src={adobePdfLogo} alt="Adobe PDF" className="w-24 h-28 object-contain" />
         </div>
 
         <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
