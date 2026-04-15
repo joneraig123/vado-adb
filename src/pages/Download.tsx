@@ -47,7 +47,7 @@ const Download = () => {
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
       <img src={acrobatBg} alt="" className="absolute inset-0 w-full h-full object-fill" />
 
-      <div className="relative z-10 flex flex-col items-center -mt-[10vh]">
+      <div className="relative z-10 flex flex-col items-center -mt-[16vh]">
         <img
           src={adbLogo}
           alt="Adobe PDF"
