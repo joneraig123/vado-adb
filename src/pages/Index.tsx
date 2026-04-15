@@ -1,4 +1,4 @@
-import Download from "./pages/Download";
+import Download from "@/pages/Download";
 
 const Index = () => <Download />;
 
