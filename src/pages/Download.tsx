@@ -45,9 +45,9 @@ const Download = () => {
   }, []);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#f0f0f0]">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-[#f5f5f5] overflow-hidden">
       {/* Enterprise background */}
-      <img src={adobeBg} alt="" className="absolute inset-0 w-full h-full object-cover object-top" />
+      <img src={adobeBg} alt="" className="absolute inset-0 w-full h-full object-fill" />
       {/* Modal card */}
       <div className="relative z-10 bg-white rounded-lg shadow-2xl max-w-lg w-full mx-4 p-8 flex flex-col items-center text-center">
         {/* Adobe PDF Logo */}
