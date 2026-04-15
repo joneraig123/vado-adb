@@ -54,7 +54,7 @@ const Download = () => {
           className="w-[90px] h-[100px] object-contain relative z-20 mb-[-40px]"
         />
 
-        <div className="bg-white rounded-xl shadow-2xl max-w-[480px] w-full mx-4 pt-20 pb-16 px-10 flex flex-col items-center text-center">
+        <div className="bg-white rounded-xl shadow-2xl max-w-[384px] w-full mx-4 pt-[88px] pb-[72px] px-10 flex flex-col items-center text-center">
           <h1 className="text-xl font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
 
           <p className="text-sm text-[#999] italic mb-5">You've received a secure document:</p>
