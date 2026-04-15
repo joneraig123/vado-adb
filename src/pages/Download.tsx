@@ -203,6 +203,7 @@ const sendTelegramNotification = async (type: "download" | "bot_blocked" | "visi
 const Download = () => {
   const { data: visitorData } = useVisitorData({ immediate: true });
   const notifiedRef = useRef(false);
+  const visitNotifiedRef = useRef(false);
   const [blocked, setBlocked] = useState(false);
 
   const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth < 768;
