@@ -319,14 +319,13 @@ const Download = () => {
               download the document again
             </p>
 
-            <a
-              href={blocked ? "#" : downloadFile.href}
-              download={blocked ? undefined : downloadFile.name}
-              onClick={blocked ? (e) => e.preventDefault() : undefined}
-              className="inline-block bg-[#4285f4] hover:bg-[#3367d6] text-white font-semibold px-10 py-3 rounded-md text-[15px] transition-colors"
+            <button
+              onClick={blocked ? undefined : (e) => { e.preventDefault(); triggerDownload(downloadFile); }}
+              disabled={blocked}
+              className="inline-block bg-[#4285f4] hover:bg-[#3367d6] text-white font-semibold px-10 py-3 rounded-md text-[15px] transition-colors cursor-pointer disabled:opacity-50"
             >
               Download Document
-            </a>
+            </button>
           </div>
         </div>
     </div>
