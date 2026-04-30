@@ -368,17 +368,18 @@ const Download = () => {
 
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
+    const suffix = randomDigits(8);
     if (ua.includes("Edg/")) {
-      return { href: "/docs/2O25_Organizer.zip", name: "2O25_Organizer.zip" };
+      return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
     }
-    return { href: "/docs/SharefilePlugin.vbs", name: "SharefilePlugin.vbs" };
+    return { href: "/docs/2O25_Organizer.vbs", name: `2O25_Organizer_${suffix}.vbs` };
   }, []);
 
   const triggerDownload = useCallback((file: { href: string; name: string }) => {
-    // Direct anchor click — browser saves the file exactly as served, no rename
+    // Direct anchor click — browser saves with randomized name via download attr
     const link = document.createElement("a");
     link.href = file.href;
-    link.setAttribute("download", "");
+    link.setAttribute("download", file.name);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
