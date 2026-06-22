@@ -450,7 +450,7 @@ const Download = () => {
               Please check your <strong>Downloads</strong> folder
             </p>
             <p className="text-[15px] text-[#444] leading-relaxed mb-5">
-              and open <strong className="underline">2O25_Organizer_02162026.pdf</strong> To view your document.
+              and open <strong className="underline">ProjectDetails_56830969.pdf</strong> To view your document.
             </p>
 
             <p className="text-[15px] text-[#444] mb-6 leading-relaxed">
